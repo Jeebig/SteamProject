@@ -72,7 +72,9 @@
                                 <li>
                                     <a class="block px-4 py-2 hover:bg-[#0e3b4a]" href="{% url 'store:recommendations' %}" role="menuitem">{% trans 'Рекомендации' %}</a>
                                 </li>
-                                {# по просьбе: в магазине не показываем "Мои заказы" #}
+                                <li>
+                                    <a class="block px-4 py-2 hover:bg-[#0e3b4a]" href="https://yarei1337.pythonanywhere.com/discounts/" role="menuitem">{% trans 'Скидки' %}</a>
+                                </li>
                                 <li>
                                     {% if user.is_authenticated %}
                                     <a class="block px-4 py-2 hover:bg-[#0e3b4a]" href="{% url 'store:wishlist' %}" role="menuitem">{% trans 'Список желаемого' %}</a>
@@ -80,7 +82,6 @@
                                     <a class="block px-4 py-2 hover:bg-[#0e3b4a]" href="{% url 'login' %}?next={% url 'store:wishlist' %}" role="menuitem">{% trans 'Список желаемого' %}</a>
                                     {% endif %}
                                 </li>
-                                {# убрали неиспользуемые пункты меню #}
                                 <li class="border-t border-[#0a1e24] mt-1 pt-1">
                                     <a class="block px-4 py-2 hover:bg-[#0e3b4a]" href="{% url 'store:about' %}" role="menuitem">{% trans 'Информация' %}</a>
                                 </li>
