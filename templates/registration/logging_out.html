@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="min-h-[50vh] flex flex-col items-center justify-center text-center">
+  <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+  <h1 class="text-xl font-semibold">Выходим из аккаунта…</h1>
+  <p class="text-sm text-gray-400 mt-2">Секундочку, пожалуйста</p>
+</div>
+<script>
+  (function(){
+    const to = "{{ redirect_to|default:'/'|escapejs }}";
+    const delay = {{ delay_ms|default:1000 }};
+    setTimeout(function(){ window.location.href = to; }, delay);
+  })();
+</script>
+{% endblock %}

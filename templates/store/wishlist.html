@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static store_extras i18n %}
+{% block content %}
+<div class="bg-gray-900 rounded-lg p-6 mb-6">
+    <div class="flex items-center gap-4 mb-4">
+        {% if user.profile.steam_avatar %}
+            <img src="{{ user.profile.steam_avatar }}" {% img_dims user.profile.steam_avatar %}
+                 class="w-16 h-16 rounded-full border-2 border-blue-500 object-cover"
+                 alt="{{ user.username }} avatar">
+        {% else %}
+          <img src="{% static 'store/img/placeholder.svg' %}"
+                 class="w-16 h-16 rounded-full border-2 border-blue-500 object-cover"
+                 alt="{{ user.username }} avatar">
+        {% endif %}
+        <div>
+            <h1 class="text-2xl font-bold">{{ user.username }}: {% trans 'Список желаемого' %}</h1>
+            <div class="text-sm text-gray-400">{% trans 'Список желаемого:' %} {{ games|length }}</div>
+        </div>
+    </div>
+    <form method="get" class="flex gap-2 mb-4 items-center">
+    <input type="text" name="q" value="{{ filters.q }}" placeholder="{% trans 'Поиск по названию' %}"
+            class="px-3 py-2 rounded bg-gray-800 text-gray-100 w-full">
+        <select name="platform" class="px-3 py-2 rounded bg-gray-800 text-gray-100">
+            <option value="">{% trans 'Все платформы' %}</option>
+            <option value="win" {% if filters.platform == 'win' %}selected{% endif %}>Windows</option>
+            <option value="mac" {% if filters.platform == 'mac' %}selected{% endif %}>macOS</option>
+            <option value="linux" {% if filters.platform == 'linux' %}selected{% endif %}>Linux</option>
+        </select>
+        <select name="sort" class="px-3 py-2 rounded bg-gray-800 text-gray-100">
+            <option value="-created" {% if filters.sort == '' or filters.sort == '-created' %}selected{% endif %}>{% trans 'Сначала новые' %}</option>
+            <option value="created" {% if filters.sort == 'created' %}selected{% endif %}>{% trans 'Сначала старые' %}</option>
+            <option value="title" {% if filters.sort == 'title' %}selected{% endif %}>{% trans 'Название A→Z' %}</option>
+            <option value="-title" {% if filters.sort == '-title' %}selected{% endif %}>{% trans 'Название Z→A' %}</option>
+            <option value="price" {% if filters.sort == 'price' %}selected{% endif %}>{% trans 'Цена ↑' %}</option>
+            <option value="-price" {% if filters.sort == '-price' %}selected{% endif %}>{% trans 'Цена ↓' %}</option>
+        </select>
+    <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white">{% trans 'Применить' %}</button>
+    <a href="{% url 'store:wishlist' %}" class="bg-gray-700 px-3 py-2 rounded text-gray-200">{% trans 'Сбросить' %}</a>
+    </form>
+    <div class="space-y-6">
+        {% for game in games %}
+    <div class="bg-gray-800 rounded-lg flex gap-4 p-4 items-center" data-wishlist-item="{{ game.slug }}">
+            <div class="w-40 h-24 flex-shrink-0">
+                <a href="{% url 'store:game_detail' game.slug %}" class="block w-full h-full">
+                    {% with local_path="steam_imports/"|add:game.appid|add:"/header.jpg" %}
+                    {% if game.cover_image %}
+                    <img src="{{ game.cover_image.url }}" {% img_dims game.cover_image.url %} alt="{{ game.title }}" class="w-full h-full object-cover rounded">
+                    {% elif local_path|file_exists %}
+                    <img src="{{ MEDIA_URL }}steam_imports/{{ game.appid }}/header.jpg" {% img_dims MEDIA_URL|add:'steam_imports/'|add:game.appid|add:'/header.jpg' %} alt="{{ game.title }}"
+                        class="w-full h-full object-cover rounded">
+                    {% elif game.appid %}
+                    <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ game.appid }}/header.jpg" {% img_dims 'https://cdn.cloudflare.steamstatic.com/steam/apps/'|add:game.appid|add:'/header.jpg' %}
+                        alt="{{ game.title }}" class="w-full h-full object-cover rounded">
+                    {% else %}
+                    <div class="bg-gray-700 w-full h-full flex items-center justify-center rounded">{% trans 'Нет изображения' %}</div>
+                    {% endif %}
+                    {% endwith %}
+                </a>
+            </div>
+            <div class="flex-1">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold"><a class="hover:underline" href="{% url 'store:game_detail' game.slug %}">{{ game.title }}</a></h2>
+                    <span class="font-bold text-lg bg-gray-900 px-3 py-1 rounded">{% price_display game.price game.currency preferred_currency game.original_price game.discount_percent %}</span>
+                </div>
+                <div class="text-sm text-gray-400 mb-1">
+                    {% if game.developer %}{{ game.developer.name }}{% else %}—{% endif %}
+                    {% for genre in game.genres.all %}
+                        <span class="ml-2 px-2 py-1 bg-gray-700 rounded">{{ genre.name }}</span>
+                    {% empty %}
+                                <span class="ml-2 px-2 py-1 bg-gray-700 rounded text-gray-500">{% trans 'Жанры не указаны' %}</span>
+                    {% endfor %}
+                </div>
+                <div class="text-xs text-gray-500 mb-1">{% trans 'Дата выхода:' %} {{ game.release_date|date:"d.m.Y"|default:"—" }}</div>
+                <div class="text-xs text-gray-400 mb-1">
+                    {% if game.supports_windows %}<span class="px-2 py-0.5 border border-gray-600 rounded mr-1">Win</span>{% endif %}
+                    {% if game.supports_mac %}<span class="px-2 py-0.5 border border-gray-600 rounded mr-1">Mac</span>{% endif %}
+                    {% if game.supports_linux %}<span class="px-2 py-0.5 border border-gray-600 rounded">Linux</span>{% endif %}
+                </div>
+                <div class="text-xs text-gray-500 mb-1">{% trans 'Добавлено на сайт:' %} {{ game.created_at|date:'d.m.Y' }}</div>
+                <div class="flex gap-2 mt-2">
+                    {% is_owned user game as owned_flag %}
+                    {% if owned_flag %}
+                        <span class="px-4 py-2 rounded bg-green-700/40 border border-green-600 text-green-100">{% trans 'В библиотеке' %}</span>
+                    {% else %}
+                        <form action="{% url 'store:cart_add' game.slug %}" method="post" class="inline js-cart-add">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'store:wishlist' %}">
+                            <button type="submit" class="bg-green-600 px-4 py-2 rounded text-white">{% trans 'Добавить в корзину' %}</button>
+                        </form>
+                    {% endif %}
+                    <form action="{% url 'store:wishlist_toggle' game.slug %}" method="post" class="inline js-wishlist-toggle">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{% url 'store:wishlist' %}">
+                        <button type="submit" class="bg-gray-700 px-4 py-2 rounded text-gray-200">{% trans 'Удалить' %}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+    <p class="text-gray-400">{% trans 'Ваш список желаемого пуст.' %} <a href="{% url 'store:game_list' %}" class="text-blue-400 underline">{% trans 'Перейти в каталог' %}</a></p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

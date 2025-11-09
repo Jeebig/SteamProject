@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% load static store_extras %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-6">
+  <h1 class="text-3xl font-bold mb-6">Чарты</h1>
+
+  {% if chart_metrics %}
+  <section class="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
+    <div class="bg-[#0f2a33] border border-[#0a1e24] rounded p-4 text-center">
+      <div class="text-2xl font-bold">{{ chart_metrics.total }}</div>
+      <div class="text-xs text-gray-300">Игр с обложками</div>
+    </div>
+    <div class="bg-[#0f2a33] border border-[#0a1e24] rounded p-4 text-center">
+      <div class="text-2xl font-bold">{{ chart_metrics.discounted }}</div>
+      <div class="text-xs text-gray-300">Со скидками</div>
+    </div>
+    <div class="bg-[#0f2a33] border border-[#0a1e24] rounded p-4 text-center">
+      <div class="text-2xl font-bold">{{ chart_metrics.avg_discount }}%</div>
+      <div class="text-xs text-gray-300">Средняя скидка</div>
+    </div>
+    <div class="bg-[#0f2a33] border border-[#0a1e24] rounded p-4 text-center">
+      <div class="text-2xl font-bold">{{ chart_metrics.free_count }}</div>
+      <div class="text-xs text-gray-300">Бесплатные</div>
+    </div>
+    <div class="bg-[#0f2a33] border border-[#0a1e24] rounded p-4 text-center">
+      <div class="text-2xl font-bold">{{ chart_metrics.upcoming }}</div>
+      <div class="text-xs text-gray-300">Скоро выходит</div>
+    </div>
+  </section>
+  {% endif %}
+
+  <div class="space-y-10">
+    <section>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl font-semibold">Топ продаж</h2>
+        <span class="text-xs text-gray-400">Источник: Steam Featured</span>
+      </div>
+      {% if top_sellers %}
+        {% include 'store/_card_grid.html' with games=top_sellers %}
+      {% else %}
+        <div class="text-gray-400">Нет данных о топе продаж.</div>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-semibold mb-4">Самые желаемые (у нас)</h2>
+      {% if wishlisted %}
+        {% include 'store/_card_grid.html' with games=wishlisted %}
+      {% else %}
+        <div class="text-gray-400">Пока никто не добавлял игры в желаемое.</div>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-semibold mb-4">Лучшие по оценкам</h2>
+      {% if top_rated %}
+        {% include 'store/_card_grid.html' with games=top_rated %}
+      {% else %}
+        <div class="text-gray-400">Оценок ещё нет.</div>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-semibold mb-4">Самые обсуждаемые</h2>
+      {% if most_reviewed %}
+        {% include 'store/_card_grid.html' with games=most_reviewed %}
+      {% else %}
+        <div class="text-gray-400">Пока нет отзывов.</div>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-semibold mb-4">Большие скидки</h2>
+      {% if biggest_discounts %}
+        {% include 'store/_card_grid.html' with games=biggest_discounts %}
+      {% else %}
+        <div class="text-gray-400">Скидки не найдены.</div>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-semibold mb-4">Новые релизы</h2>
+      {% if new_releases %}
+        {% include 'store/_card_grid.html' with games=new_releases %}
+      {% else %}
+        <div class="text-gray-400">Новых релизов нет.</div>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-semibold mb-4">Бесплатные хиты</h2>
+      {% if free_popular %}
+        {% include 'store/_card_grid.html' with games=free_popular %}
+      {% else %}
+        <div class="text-gray-400">Бесплатных хитов пока нет.</div>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-semibold mb-4">Скоро выходит</h2>
+      {% if coming_soon %}
+        {% include 'store/_card_grid.html' with games=coming_soon %}
+      {% else %}
+        <div class="text-gray-400">Скорых релизов нет.</div>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-semibold mb-4">Популярное у нас (по продажам)</h2>
+      {% if best_sellers_local %}
+        {% include 'store/_card_grid.html' with games=best_sellers_local %}
+      {% else %}
+        <div class="text-gray-400">Пока никто ничего не купил.</div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static store_extras i18n %}
+{% block content %}
+{% now 'U' as nowts %}
+<div class="grid grid-cols-1 gap-4">
+  <h1 class="text-2xl font-bold">{% trans 'Моя библиотека' %}</h1>
+  <form method="get" class="mb-4 flex flex-wrap gap-4 items-end bg-[#0f2a33] p-3 rounded">
+    <div>
+  <label class="block text-xs uppercase tracking-wide text-gray-400">{% trans 'Сортировка' %}</label>
+      <select name="sort" class="mt-1 bg-[#09313d] text-sm rounded px-2 py-1">
+  <option value="" {% if not filters.sort %}selected{% endif %}>{% trans 'По обновлению' %}</option>
+  <option value="recent" {% if filters.sort == 'recent' %}selected{% endif %}>{% trans 'Недавние покупки' %}</option>
+  <option value="oldest" {% if filters.sort == 'oldest' %}selected{% endif %}>{% trans 'Старые покупки' %}</option>
+  <option value="playtime" {% if filters.sort == 'playtime' %}selected{% endif %}>{% trans 'Время игры ↓' %}</option>
+  <option value="playtime_asc" {% if filters.sort == 'playtime_asc' %}selected{% endif %}>{% trans 'Время игры ↑' %}</option>
+  <option value="title" {% if filters.sort == 'title' %}selected{% endif %}>{% trans 'Название A→Z' %}</option>
+  <option value="title_desc" {% if filters.sort == 'title_desc' %}selected{% endif %}>{% trans 'Название Z→A' %}</option>
+      </select>
+    </div>
+    <div>
+  <label class="block text-xs uppercase tracking-wide text-gray-400">{% trans 'Мин. часов' %}</label>
+      <input type="number" step="0.1" name="min_play" value="{{ filters.min_play }}" class="mt-1 bg-[#09313d] text-sm rounded px-2 py-1 w-24" />
+    </div>
+    <div>
+  <label class="block text-xs uppercase tracking-wide text-gray-400">{% trans 'Макс. часов' %}</label>
+      <input type="number" step="0.1" name="max_play" value="{{ filters.max_play }}" class="mt-1 bg-[#09313d] text-sm rounded px-2 py-1 w-24" />
+    </div>
+    <div class="flex gap-2">
+  <button type="submit" class="px-3 py-1 bg-blue-600 rounded text-sm">{% trans 'Применить' %}</button>
+  <a href="{% url 'store:library' %}" class="px-3 py-1 bg-[#12333f] rounded text-sm">{% trans 'Сбросить' %}</a>
+    </div>
+  </form>
+
+  {% if games %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for g in games %}
+      <div class="bg-[#232f3e] p-3 rounded-lg">
+        <div class="relative w-full h-40 rounded overflow-hidden">
+          <div class="absolute inset-0 animate-pulse bg-gradient-to-br from-[#223946] to-[#1a2e38] skeleton" aria-hidden="true"></div>
+          {% if g.appid %}
+                      <img data-src="/media/steam_imports/{{ g.appid }}/header.jpg?v={{ nowts }}" {% img_dims MEDIA_URL|add:'steam_imports/'|add:g.appid|add:'/header.jpg' %} alt="{{ g.title }}" class="w-full h-40 object-cover rounded opacity-0 transition-opacity duration-300 lazy-img" onerror="this.onerror=null;this.src='{% if g.cover_image %}{{ g.cover_image.url }}{% else %}{% static 'store/img/placeholder.svg' %}{% endif %}'" />
+          {% elif g.cover_image %}
+                      <img data-src="{{ g.cover_image.url }}" {% img_dims g.cover_image.url %} alt="{{ g.title }}" class="w-full h-40 object-cover rounded opacity-0 transition-opacity duration-300 lazy-img" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'" />
+          {% else %}
+                      <img data-src="{% static 'store/img/placeholder.svg' %}" alt="{{ g.title }}" class="w-full h-40 object-cover rounded opacity-0 transition-opacity duration-300 lazy-img" />
+          {% endif %}
+        </div>
+        <div class="mt-2 flex items-center justify-between">
+          <a class="text-lg hover:underline" href="{% url 'store:game_detail' g.slug %}">{{ g.title }}</a>
+          <span class="text-xs px-2 py-1 rounded bg-green-700/40 border border-green-600">{% trans 'В библиотеке' %}</span>
+        </div>
+        <div class="text-xs text-gray-400 mt-1 flex flex-wrap gap-2">
+          {% if g.playtime_forever %}<span title="{% trans 'Минут всего' %}">⏱ {% n_minutes g.playtime_forever %}</span>{% endif %}
+          {% if g.last_purchase_at %}<span title="{% trans 'Последняя покупка' %}">🛒 {{ g.last_purchase_at|date:'Y-m-d' }}</span>{% endif %}
+        </div>
+        <div class="text-sm text-gray-400">{% if g.developer %}{{ g.developer.name }}{% endif %}</div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+  <div class="bg-gray-900 p-6 rounded">{% trans 'Ещё нет купленных игр.' %}</div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+(function(){
+  const imgs = document.querySelectorAll('img.lazy-img[data-src]');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting){ const img=e.target; img.src=img.getAttribute('data-src'); img.addEventListener('load',()=>{ img.classList.remove('opacity-0'); const sk=img.parentElement.querySelector('.skeleton'); if(sk) sk.remove(); }, {once:true}); io.unobserve(img);} });
+  }, { rootMargin:'120px' });
+  imgs.forEach(i=>io.observe(i));
+})();
+</script>
+{% endblock %}

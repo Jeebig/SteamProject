@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<!-- HERO: лёгкий, без лишней графики, с мягкими подсветками -->
+<section class="relative overflow-hidden rounded-xl bg-gradient-to-b from-[#0b2731] to-[#071722] border border-[#0a1e24] promo-big-shadow">
+  <div class="pointer-events-none absolute -top-20 -left-24 w-72 h-72 bg-cyan-500/10 blur-3xl rounded-full"></div>
+  <div class="pointer-events-none absolute -bottom-24 -right-24 w-72 h-72 bg-blue-500/10 blur-3xl rounded-full"></div>
+  <div class="px-6 md:px-10 py-10 md:py-16 relative">
+    <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">О платформе</h1>
+    <p class="mt-4 text-blue-100 max-w-2xl">Магазин, библиотека и сообщество — всё в одном месте. Минимум шума, максимум пользы.</p>
+    <div class="mt-8 flex gap-3 flex-wrap">
+      <a href="{% url 'store:game_list' %}" class="px-5 py-2.5 rounded bg-blue-600 hover:bg-blue-700 text-white font-semibold">Открыть магазин</a>
+      <a href="{% url 'store:library' %}" class="px-5 py-2.5 rounded bg-[#0d3a46] hover:bg-[#114e5f] text-white font-semibold">Моя библиотека</a>
+    </div>
+  </div>
+  </section>
+
+<!-- МЕТРИКИ: компактные карточки -->
+<section class="grid sm:grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+  <div class="bg-[#0f2a33] border border-[#0a1e24] rounded-lg p-6 text-center">
+    <div class="text-3xl font-bold">{{ metrics.games }}</div>
+    <div class="text-sm text-gray-300">Игры в каталоге</div>
+  </div>
+  <div class="bg-[#0f2a33] border border-[#0a1e24] rounded-lg p-6 text-center">
+    <div class="text-3xl font-bold">{{ metrics.genres }}</div>
+    <div class="text-sm text-gray-300">Жанры</div>
+  </div>
+  <div class="bg-[#0f2a33] border border-[#0a1e24] rounded-lg p-6 text-center">
+    <div class="text-3xl font-bold">{{ metrics.users }}</div>
+    <div class="text-sm text-gray-300">Пользователей</div>
+  </div>
+  <div class="bg-[#0f2a33] border border-[#0a1e24] rounded-lg p-6 text-center">
+    <div class="text-3xl font-bold">{{ metrics.reviews }}</div>
+    <div class="text-sm text-gray-300">Отзывов</div>
+  </div>
+  </section>
+
+<!-- ОСОБЕННОСТИ: 3 простые карточки с иконками -->
+<section class="mt-8 grid md:grid-cols-3 gap-6">
+  <div class="bg-[#0f2a33] border border-[#0a1e24] rounded-lg p-6 flex gap-4">
+    <div class="shrink-0 w-10 h-10 rounded bg-blue-600/20 text-blue-200 flex items-center justify-center">
+      <svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M3 6a2 2 0 012-2h6v4H3V6zm10-2h6a2 2 0 012 2v2h-8V4zM3 12h20v2a2 2 0 01-2 2H3v-4zm0 6h12v2H5a2 2 0 01-2-2z"/></svg>
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold mb-1">Магазин и скидки</h3>
+      <p class="text-gray-300 text-sm">Ищите новые игры и ловите акции. Цены — в вашей валюте.</p>
+    </div>
+  </div>
+  <div class="bg-[#0f2a33] border border-[#0a1e24] rounded-lg p-6 flex gap-4">
+    <div class="shrink-0 w-10 h-10 rounded bg-emerald-600/20 text-emerald-200 flex items-center justify-center">
+      <svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M5 4h14a1 1 0 011 1v11a1 1 0 01-1 1h-6l-3 3-3-3H5a1 1 0 01-1-1V5a1 1 0 011-1z"/></svg>
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold mb-1">Библиотека</h3>
+      <p class="text-gray-300 text-sm">Все покупки под рукой: карточки, скриншоты, рейтинги и желания.</p>
+    </div>
+  </div>
+  <div class="bg-[#0f2a33] border border-[#0a1e24] rounded-lg p-6 flex gap-4">
+    <div class="shrink-0 w-10 h-10 rounded bg-purple-600/20 text-purple-200 flex items-center justify-center">
+      <svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M12 2a5 5 0 015 5v1h1a3 3 0 013 3v5a4 4 0 01-4 4h-3v-5h2V8a4 4 0 00-8 0v7h2v5H7a4 4 0 01-4-4v-5a3 3 0 013-3h1V7a5 5 0 015-5z"/></svg>
+    </div>
+    <div>
+      <h3 class="text-lg font-semibold mb-1">Отзывы и рекомендации</h3>
+      <p class="text-gray-300 text-sm">Оценки, полезность отзывов и персональные рекомендации.</p>
+    </div>
+  </div>
+  </section>
+
+<!-- ПЛАТФОРМЫ: компактные плашки -->
+<section class="mt-8 bg-[#0f2a33] border border-[#0a1e24] rounded-lg p-6">
+  <h3 class="text-lg font-semibold mb-3">Поддерживаемые платформы</h3>
+  <div class="flex flex-wrap items-center gap-2 text-sm text-gray-200">
+    <span class="px-3 py-1 rounded bg-[#12333f]">Windows</span>
+    <span class="px-3 py-1 rounded bg-[#12333f]">macOS</span>
+    <span class="px-3 py-1 rounded bg-[#12333f]">Linux</span>
+  </div>
+  </section>
+
+<!-- ДИСКЛЕЙМЕР: очень ненавязчиво -->
+<p class="mt-8 text-xs text-gray-500">Страница вдохновлена оформлением Steam About и адаптирована под текущий проект.</p>
+{% endblock %}

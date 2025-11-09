@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static store_extras i18n %}
+
+{% block content %}
+{% now 'U' as nowts %}
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- Filters column -->
+    <aside class="lg:col-span-1 bg-[#0f2a33] p-4 rounded-lg border border-[#072024]">
+    <h3 class="text-lg font-bold text-white mb-3">{% trans 'Фильтры' %}</h3>
+        <form method="get" class="space-y-4">
+            <div>
+                <div class="text-sm text-gray-300 mb-2">{% trans 'Категории' %}</div>
+                <div class="flex flex-col gap-2 mb-2" id="categoryList" role="listbox" aria-label="{% trans 'Категории' %}">
+                    {% catalog_categories games 24 as categories %}
+                    {% if categories %}
+                        {% for category in categories %}
+                            {% if filters.category == category.slug %}
+                                <button type="button" data-slug="{{ category.slug }}" aria-pressed="true"
+                                        class="px-3 py-2 rounded text-left text-sm transition-colors bg-[#1c5a6e] ring-1 ring-white/20 text-white">
+                                    {{ category.name }}
+                                </button>
+                            {% else %}
+                                <button type="button" data-slug="{{ category.slug }}" aria-pressed="false"
+                                        class="px-3 py-2 rounded text-left text-sm transition-colors bg-[#12333f] hover:bg-[#18566f] text-white">
+                                    {{ category.name }}
+                                </button>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-gray-400">{% trans 'Категории не найдены' %}</div>
+                    {% endif %}
+                </div>
+                <!-- hidden input that carries the chosen category slug -->
+                <input id="categoryInput" type="hidden" name="category" value="{{ filters.category }}" />
+            </div>
+
+            <div>
+                <label class="text-xs text-gray-400">{% trans 'Поиск' %}</label>
+                <input type="search" name="q" value="{{ filters.q }}" placeholder="{% trans 'Поиск по названию...' %}" class="w-full mt-2 p-2 rounded bg-[#062025] text-white" />
+            </div>
+
+            <div>
+                <div class="text-xs text-gray-400">{% trans 'Цена' %}</div>
+                <div class="flex gap-2 mt-2">
+                    <input type="number" step="0.01" name="min_price" value="{{ filters.min_price }}" placeholder="{% trans 'От' %}" class="w-1/2 p-2 rounded bg-[#062025] text-white" />
+                    <input type="number" step="0.01" name="max_price" value="{{ filters.max_price }}" placeholder="{% trans 'До' %}" class="w-1/2 p-2 rounded bg-[#062025] text-white" />
+                </div>
+            </div>
+
+            <div class="text-sm text-gray-300">
+                <div class="font-semibold mb-2">{% trans 'Платформа' %}</div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-gray-200"><input type="checkbox" name="platform" value="windows" class="mr-2" {% if 'windows' in filters.platforms or 'win' in filters.platforms %}checked{% endif %}> Windows</label>
+                    <label class="text-gray-200"><input type="checkbox" name="platform" value="macos" class="mr-2" {% if 'macos' in filters.platforms or 'mac' in filters.platforms %}checked{% endif %}> macOS</label>
+                    <label class="text-gray-200"><input type="checkbox" name="platform" value="linux" class="mr-2" {% if 'linux' in filters.platforms %}checked{% endif %}> Linux</label>
+                </div>
+                <div class="text-xs text-gray-500 mt-2">{% trans 'Фильтр платформы включён.' %}</div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">{% trans 'Показать' %}</button>
+                <a href="{% url 'store:game_list' %}" class="px-3 py-2 rounded bg-[#0d3a46] text-white text-sm">{% trans 'Сбросить' %}</a>
+            </div>
+            <script>
+                (function(){
+                    const list = document.getElementById('categoryList');
+                    const input = document.getElementById('categoryInput');
+                    if(!list || !input) return;
+                    list.addEventListener('click', (e) => {
+                        const btn = e.target.closest('button[data-slug]');
+                        if(!btn) return;
+                        const slug = btn.getAttribute('data-slug');
+                        // toggle: если уже активна — очистить, иначе установить, затем отправить форму
+                        const active = btn.getAttribute('aria-pressed') === 'true';
+                        input.value = active ? '' : slug;
+                        // отправляем форму, чтобы применить фильтр сразу
+                        (btn.form || list.closest('form'))?.submit();
+                    });
+                })();
+            </script>
+        </form>
+    </aside>
+
+    <!-- Products grid -->
+    <main class="lg:col-span-3">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-3xl text-white">{% trans 'Магазин' %}</h1>
+            <div class="flex items-center gap-2 text-sm">
+                <span class="text-gray-300">{% trans 'Сортировать:' %}</span>
+                <a href="?{% if filters.q %}q={{ filters.q }}&{% endif %}{% if filters.category %}category={{ filters.category }}&{% endif %}{% for p in filters.platforms %}platform={{ p }}&{% endfor %}{% if filters.min_price %}min_price={{ filters.min_price }}&{% endif %}{% if filters.max_price %}max_price={{ filters.max_price }}&{% endif %}sort=-rating" class="px-2 py-1 rounded bg-[#12333f] hover:bg-[#18566f] text-white {% if filters.sort == '-rating' %}!bg-[#1c5a6e]{% endif %}">{% trans 'Рейтинг ↓' %}</a>
+                <a href="?{% if filters.q %}q={{ filters.q }}&{% endif %}{% if filters.category %}category={{ filters.category }}&{% endif %}{% for p in filters.platforms %}platform={{ p }}&{% endfor %}{% if filters.min_price %}min_price={{ filters.min_price }}&{% endif %}{% if filters.max_price %}max_price={{ filters.max_price }}&{% endif %}sort=rating" class="px-2 py-1 rounded bg-[#12333f] hover:bg-[#18566f] text-white {% if filters.sort == 'rating' %}!bg-[#1c5a6e]{% endif %}">{% trans 'Рейтинг ↑' %}</a>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for game in games %}
+                <div class="bg-[#232f3e] p-3 rounded-lg">
+                    {% if game.appid %}
+                        <img src="/media/steam_imports/{{ game.appid }}/header.jpg?v={{ nowts }}" alt="{{ game.title }}" class="w-full h-40 object-cover rounded" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{% if game.cover_image %}{{ game.cover_image.url }}{% else %}{% static 'store/img/placeholder.svg' %}{% endif %}'" />
+                    {% elif game.cover_image %}
+                        <img src="{{ game.cover_image.url }}" alt="{{ game.title }}" class="w-full h-40 object-cover rounded" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'" />
+                    {% else %}
+                        <img src="{% static 'store/img/placeholder.svg' %}" alt="{{ game.title }}" class="w-full h-40 object-cover rounded" />
+                    {% endif %}
+                                        <div class="flex items-center justify-between mt-2">
+                                            <h2 class="text-lg text-white">{{ game.title }}</h2>
+                                            {% if user.is_authenticated %}
+                                                {% is_owned user game as owned_flag %}
+                                                {% if owned_flag %}
+                                                    <span class="text-xs px-2 py-1 rounded bg-green-700/40 border border-green-600">{% trans 'В библиотеке' %}</span>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                    <p class="text-sm text-gray-400">{% if game.developer %}{{ game.developer.name }}{% endif %}</p>
+                    {% if game.rating_avg %}
+                    <div class="mt-1 text-sm text-gray-300 flex items-center gap-2" title="Оценка: {{ game.rating_avg|floatformat:1 }} из 5">
+                        <span style="color:#f6c343">★</span>
+                        <span>{{ game.rating_avg|floatformat:1 }}</span>
+                        <span class="text-xs text-gray-400">({{ game.rating_count|default:0 }})</span>
+                    </div>
+                    {% endif %}
+                                        <div class="mt-2 flex justify-between items-center">
+                                                <span class="font-bold text-white">
+                                                    {% if game.price|floatformat:2 == "0.00" %}
+                                                        {% trans 'Бесплатно' %}
+                                                    {% else %}
+                                                        {% if game.discount_percent and game.original_price %}
+                                                            <span class="px-1.5 py-0.5 rounded bg-green-700/40 border border-green-600 text-green-100 text-xs">-{{ game.discount_percent }}%</span>
+                                                            <span class="line-through opacity-70 text-sm ml-1">{{ game.original_price|floatformat:2 }} {{ game.currency }}</span>
+                                                        {% endif %}
+                                                        <span class="ml-1">{{ game.price|floatformat:2 }} {{ game.currency }}</span>
+                                                    {% endif %}
+                                                </span>
+                        <div class="flex items-center gap-2">
+                            <a href="{% url 'store:game_detail' game.slug %}" class="bg-blue-600 px-3 py-1 rounded">{% trans 'Подробнее' %}</a>
+                            {% if user.is_authenticated %}
+                            <form action="{% url 'store:wishlist_toggle' game.slug %}" method="post" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <button type="submit" class="bg-red-600 px-3 py-1 rounded text-sm">♥</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-gray-400">{% trans 'No games yet — use the admin to add some.' %}</p>
+            {% endfor %}
+        </div>
+    </main>
+{% endblock %}

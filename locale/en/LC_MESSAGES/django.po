@@ -1,0 +1,1056 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: steam-clone\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-09 17:36+0200\n"
+"PO-Revision-Date: 2025-11-09 00:00+0000\n"
+"Last-Translator: YOU <you@example.com>\n"
+"Language-Team: English <you@example.com>\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: .\store\templatetags\store_extras.py:349 .\templates\base.html:243 .\templates\store\cart.html:39 .\templates\store\cart.html:113 .\templates\store\checkout.html:29 .\templates\store\checkout.html:36 .\templates\store\game_detail.html:52 .\templates\store\game_detail.html:128 .\templates\store\game_detail.html:160 .\templates\store\game_detail.html:216 .\templates\store\game_list.html:124 .\templates\store\index.html:202 .\templates\store\index.html:352 .\templates\store\index.html:386 .\templates\store\index.html:440 .\templates\store\index.html:487
+msgid "Бесплатно"
+msgstr "Free"
+
+#: .\store\views.py:586 .\templates\store\settings.html:34
+msgid "Общие"
+msgstr "General"
+
+#: .\store\views.py:590 .\templates\store\settings.html:41
+msgid "Приватность"
+msgstr "Privacy"
+
+#: .\store\views.py:594 .\templates\base.html:149 .\templates\store\settings.html:44
+msgid "Уведомления"
+msgstr "Notifications"
+
+#: .\store\views.py:633
+msgid "Настройки сохранены."
+msgstr "Settings saved."
+
+#: .\store\views.py:635
+msgid "Исправьте ошибки формы."
+msgstr "Please correct the form errors."
+
+#: .\store\views.py:1458
+#, python-format
+msgid "Списано %(amount).2f %(cur)s с баланса."
+msgstr "Deducted %(amount).2f %(cur)s from balance."
+
+#: .\store\views.py:1460
+msgid "Недостаточно средств на балансе. Списание пропущено."
+msgstr "Insufficient balance. Deduction skipped."
+
+#: .\store\views.py:1468
+msgid "Оплата прошла успешно. Спасибо за покупку!"
+msgstr "Payment successful. Thanks for your purchase!"
+
+#: .\store\views.py:1875
+msgid "Профиль не найден."
+msgstr "Profile not found."
+
+#: .\store\views.py:1883
+msgid "Введите корректную сумму."
+msgstr "Enter a valid amount."
+
+#: .\store\views.py:1886
+msgid "Сумма должна быть больше 0."
+msgstr "Amount must be greater than 0."
+
+#: .\store\views.py:1894
+#, python-format
+msgid "Минимальная сумма пополнения для %(code)s: %(amount).2f (эквивалент $1)."
+msgstr "Minimum top-up for %(code)s: %(amount).2f (equivalent of $1)."
+
+#: .\store\views.py:1924
+#, python-format
+msgid "Пополнение %(src_amount).2f %(src_cur)s → зачислено %(dst_amount).2f %(dst_cur)s."
+msgstr "Top-up %(src_amount).2f %(src_cur)s → credited %(dst_amount).2f %(dst_cur)s."
+
+#: .\store\views.py:1926
+#, python-format
+msgid "Баланс пополнен на %(amount).2f %(cur)s."
+msgstr "Balance increased by %(amount).2f %(cur)s."
+
+#: .\templates\admin\store\game\change_form.html:10
+msgid "Import again"
+msgstr "Import again"
+
+#: .\templates\base.html:55
+msgid "МАГАЗИН"
+msgstr "STORE"
+
+#: .\templates\base.html:59
+msgid "Навигация магазина"
+msgstr "Store navigation"
+
+#: .\templates\base.html:61
+msgid "Главная"
+msgstr "Home"
+
+#: .\templates\base.html:64
+msgid "Чарты"
+msgstr "Charts"
+
+#: .\templates\base.html:67 .\templates\store\recommendations.html:9
+msgid "Рекомендации"
+msgstr "Recommendations"
+
+#: .\templates\store\profile.html:152 .\templates\store\wishlist.html:16
+msgid "Список желаемого"
+msgstr "Wishlist"
+
+#: .\templates\base.html:79
+msgid "Информация"
+msgstr "About"
+
+#: .\templates\base.html:85
+msgid "БИБЛИОТЕКА"
+msgstr "LIBRARY"
+
+#: .\templates\base.html:87
+msgid "ПОДДЕРЖКА"
+msgstr "SUPPORT"
+
+#: .\templates\base.html:94
+msgid "Поиск по магазину"
+msgstr "Search the store"
+
+#: .\templates\base.html:101
+msgid "Активный язык"
+msgstr "Active language"
+
+#: .\templates\base.html:116
+msgid "Баланс кошелька"
+msgstr "Wallet balance"
+
+#: .\templates\base.html:122
+msgid "Меню аккаунта"
+msgstr "Account menu"
+
+#: .\templates\base.html:125
+msgid "Профиль"
+msgstr "Profile"
+
+#: .\templates\base.html:144
+msgid "Мои заказы"
+msgstr "My orders"
+
+#: .\templates\base.html:146
+msgid "Кошелёк"
+msgstr "Wallet"
+
+#: .\templates\base.html:147 .\templates\store\friends.html:28
+msgid "Друзья"
+msgstr "Friends"
+
+#: .\templates\base.html:148
+msgid "Подписки"
+msgstr "Subscriptions"
+
+
+
+#: .\templates\base.html:150 .\templates\store\profile.html:272
+msgid "Редактировать профиль"
+msgstr "Edit profile"
+
+#: .\templates\base.html:151 .\templates\store\profile.html:35 .\templates\store\settings.html:31
+msgid "Настройки"
+msgstr "Settings"
+
+#: .\templates\base.html:152
+msgid "Выйти"
+msgstr "Logout"
+
+#: .\templates\base.html:157
+msgid "Корзина"
+msgstr "Cart"
+
+#: .\templates\base.html:159 .\templates\registration\login.html:28
+msgid "Войти"
+msgstr "Login"
+
+#: .\templates\registration\login.html:6
+msgid "Вход в аккаунт"
+msgstr "Account login"
+
+#: .\templates\registration\login.html:20
+msgid "Имя аккаунта или email"
+msgstr "Account name or email"
+
+#: .\templates\registration\login.html:24
+msgid "Пароль"
+msgstr "Password"
+
+#: .\templates\registration\login.html:32
+msgid "Помогите, я не могу войти в аккаунт"
+msgstr "Help, I can't sign in"
+
+#: .\templates\registration\login.html:36
+msgid "Первый раз у нас?"
+msgstr "First time here?"
+
+#: .\templates\registration\login.html:37
+msgid "Создать аккаунт"
+msgstr "Create account"
+
+#: .\templates\store\cart.html:9
+msgid "Ваша корзина"
+msgstr "Your cart"
+
+#: .\templates\store\cart.html:24 .\templates\store\cart.html:94 .\templates\store\checkout.html:22 .\templates\store\profile.html:87 .\templates\store\profile.html:94 .\templates\store\profile.html:178 .\templates\store\wishlist.html:55
+msgid "Нет изображения"
+msgstr "No image"
+
+#: .\templates\store\cart.html:51
+msgid "Количество"
+msgstr "Quantity"
+
+#: .\templates\store\cart.html:53 .\templates\store\profile.html:248 .\templates\store\wishlist.html:94
+msgid "Удалить"
+msgstr "Delete"
+
+#: .\templates\store\cart.html:53
+msgid "Обновить"
+msgstr "Update"
+
+#: .\templates\store\cart.html:66
+msgid "Продолжить покупки"
+msgstr "Continue shopping"
+
+#: .\templates\store\cart.html:67 .\templates\store\cart.html:118
+msgid "Перейти к оплате"
+msgstr "Proceed to payment"
+
+#: .\templates\store\cart.html:70
+msgid "Удалить все товары"
+msgstr "Remove all items"
+
+#: .\templates\store\cart.html:75
+msgid "Ваша корзина пуста."
+msgstr "Your cart is empty."
+
+#: .\templates\store\cart.html:75 .\templates\store\wishlist.html:100
+msgid "Перейти в каталог"
+msgstr "Go to catalog"
+
+#: .\templates\store\cart.html:82
+msgid "Рекомендации для вас"
+msgstr "Recommendations for you"
+
+#: .\templates\store\cart.html:103
+msgid "Нет рекомендаций"
+msgstr "No recommendations"
+
+#: .\templates\store\cart.html:112
+msgid "Общая стоимость"
+msgstr "Total cost"
+
+#: .\templates\store\cart.html:117
+msgid "Налог с продаж рассчитывается при оформлении покупки в регионах, где он применим."
+msgstr "Sales tax is calculated at checkout where applicable."
+
+#: .\templates\store\checkout.html:7
+msgid "Оформление заказа"
+msgstr "Checkout"
+
+#: .\templates\store\checkout.html:36 .\templates\store\checkout.html:38
+msgid "Итого:"
+msgstr "Total:"
+
+#: .\templates\store\checkout.html:45
+msgid "Вернуться в корзину"
+msgstr "Back to cart"
+
+#: .\templates\store\checkout.html:48
+msgid "Подтвердить покупку"
+msgstr "Confirm purchase"
+
+#: .\templates\store\checkout.html:52
+msgid "Корзина пуста."
+msgstr "Cart is empty."
+
+#: .\templates\store\friends.html:4
+msgid "Мои друзья"
+msgstr "My friends"
+
+#: .\templates\store\friends.html:6
+msgid "Добавить друга по ID"
+msgstr "Add friend by ID"
+
+#: .\templates\store\friends.html:7
+msgid "Поделитесь своим ID, чтобы вас могли добавить. ID не меняется при смене ника."
+msgstr "Share your ID so others can add you. The ID does not change when you change nickname."
+
+#: .\templates\store\friends.html:10
+msgid "Ваш ID"
+msgstr "Your ID"
+
+#: .\templates\store\friends.html:13
+msgid "Скопировать ID"
+msgstr "Copy ID"
+
+#: .\templates\store\friends.html:16
+msgid "Введите ID друга..."
+msgstr "Enter friend ID..."
+
+#: .\templates\store\friends.html:17
+msgid "Добавить"
+msgstr "Add"
+
+#: .\templates\store\friends.html:22
+msgid "Поиск друга..."
+msgstr "Search friend..."
+
+#: .\templates\store\friends.html:23
+msgid "Искать"
+msgstr "Search"
+
+#: .\templates\store\friends.html:24 .\templates\store\wallet_topup.html:51
+msgid "Сброс"
+msgstr "Reset"
+
+#: .\templates\store\friends.html:54
+msgid "Пока нет друзей."
+msgstr "No friends yet."
+
+#: .\templates\store\friends.html:59
+msgid "Входящие заявки"
+msgstr "Incoming requests"
+
+#: .\templates\store\friends.html:84
+msgid "Нет входящих заявок."
+msgstr "No incoming requests."
+
+#: .\templates\store\friends.html:89
+msgid "Исходящие заявки"
+msgstr "Outgoing requests"
+
+#: .\templates\store\friends.html:109
+msgid "Нет исходящих заявок."
+msgstr "No outgoing requests."
+
+#: .\templates\store\friends.html:152
+msgid "Произошла ошибка."
+msgstr "An error occurred."
+
+#: .\templates\store\friends.html:158
+msgid "Сетевая ошибка. Попробуйте снова."
+msgstr "Network error. Try again."
+
+#: .\templates\store\game_detail.html:40
+msgid "Удалить отзыв"
+msgstr "Delete review"
+
+#: .\templates\store\game_detail.html:49
+msgid "Стандартное издание"
+msgstr "Standard edition"
+
+#: .\templates\store\game_detail.html:57 .\templates\store\game_detail.html:222 .\templates\store\game_list.html:109 .\templates\store\library.html:50 .\templates\store\recommendations.html:57 .\templates\store\wishlist.html:83
+msgid "В библиотеке"
+msgstr "In library"
+
+#: .\templates\store\game_detail.html:62 .\templates\store\game_detail.html:227
+msgid "В корзину"
+msgstr "Add to cart"
+
+#: .\templates\store\game_detail.html:68 .\templates\store\game_detail.html:233
+msgid "В желаемое"
+msgstr "Add to wishlist"
+
+#: .\templates\store\game_detail.html:71 .\templates\store\game_detail.html:237
+msgid "Войдите для покупки"
+msgstr "Log in to purchase"
+
+#: .\templates\store\game_detail.html:84
+msgid "СИСТЕМНЫЕ ТРЕБОВАНИЯ"
+msgstr "SYSTEM REQUIREMENTS"
+
+#: .\templates\store\game_detail.html:87
+msgid "МИНИМАЛЬНЫЕ:"
+msgstr "MINIMUM:"
+
+#: .\templates\store\game_detail.html:89 .\templates\store\game_detail.html:95
+msgid "Информация не указана"
+msgstr "No information provided"
+
+#: .\templates\store\game_detail.html:93
+msgid "РЕКОМЕНДУЕМЫЕ:"
+msgstr "RECOMMENDED:"
+
+#: .\templates\store\game_detail.html:105
+msgid "БОЛЬШЕ ПРОДУКТОВ"
+msgstr "MORE PRODUCTS"
+
+#: .\templates\store\game_detail.html:107 .\templates\store\profile.html:212
+msgid "Подписаться"
+msgstr "Subscribe"
+
+#: .\templates\store\game_detail.html:108 .\templates\store\game_detail.html:141
+msgid "Просмотреть все"
+msgstr "View all"
+
+#: .\templates\store\game_detail.html:111 .\templates\store\game_detail.html:143 .\templates\store\game_detail.html:395 .\templates\store\wallet_topup.html:86
+msgid "Назад"
+msgstr "Back"
+
+#: .\templates\store\game_detail.html:112 .\templates\store\game_detail.html:399 .\templates\store\wallet_topup.html:90
+msgid "Вперёд"
+msgstr "Forward"
+
+#: .\templates\store\game_detail.html:140
+msgid "ПОХОЖИЕ ТОВАРЫ"
+msgstr "SIMILAR PRODUCTS"
+
+#: .\templates\store\game_detail.html:188
+msgid "РАЗРАБОТЧИК:"
+msgstr "DEVELOPER:"
+
+#: .\templates\store\game_detail.html:191
+msgid "ДАТА ВЫХОДА:"
+msgstr "RELEASE DATE:"
+
+#: .\templates\store\game_detail.html:194
+msgid "ЖАНРЫ:"
+msgstr "GENRES:"
+
+#: .\templates\store\game_detail.html:243
+msgid "Отзывы:"
+msgstr "Reviews:"
+
+#: .\templates\store\game_detail.html:243
+msgid "Средняя:"
+msgstr "Average:"
+
+#: .\templates\store\game_detail.html:245
+#, python-format
+msgid "Средняя оценка: %(score)s из 5"
+msgstr "Average rating: %(score)s of 5"
+
+#: .\templates\store\game_detail.html:268
+msgid "Отзывы"
+msgstr "Reviews"
+
+#: .\templates\store\game_detail.html:273
+msgid "Ваша оценка"
+msgstr "Your rating"
+
+#: .\templates\store\game_detail.html:281 .\templates\store\game_detail.html:285 .\templates\store\game_detail.html:371 .\templates\store\game_detail.html:375
+#, python-format
+msgid "%(score)s из 5"
+msgstr "%(score)s of 5"
+
+#: .\templates\store\game_detail.html:291
+msgid "Поделитесь впечатлениями"
+msgstr "Share your thoughts"
+
+#: .\templates\store\game_detail.html:293
+msgid "Сохранить отзыв"
+msgstr "Save review"
+
+#: .\templates\store\game_detail.html:296
+msgid "Оставлять отзывы могут только купившие игру."
+msgstr "Only buyers can leave reviews."
+
+#: .\templates\store\game_detail.html:298
+msgid "Войдите, чтобы оставить отзыв."
+msgstr "Log in to leave a review."
+
+#: .\templates\store\game_detail.html:302
+msgid "Сортировка:"
+msgstr "Sort:"
+
+#: .\templates\store\game_detail.html:303
+msgid "Полезности"
+msgstr "Helpfulness"
+
+#: .\templates\store\game_detail.html:304
+msgid "Новые"
+msgstr "Newest"
+
+#: .\templates\store\game_detail.html:305
+msgid "Старые"
+msgstr "Oldest"
+
+#: .\templates\store\game_detail.html:313
+#, python-format
+msgid "Оценка: %(score)s из 5"
+msgstr "Rating: %(score)s of 5"
+
+#: .\templates\store\game_detail.html:341
+msgid "Полезен"
+msgstr "Helpful"
+
+#: .\templates\store\game_detail.html:349
+msgid "Не полезен"
+msgstr "Not helpful"
+
+#: .\templates\store\game_detail.html:353
+#, python-format
+msgid "Полезен: %(yes)s · Не полезен: %(no)s"
+msgstr "Helpful: %(yes)s · Not helpful: %(no)s"
+
+#: .\templates\store\game_detail.html:359
+msgid "Редактировать отзыв"
+msgstr "Edit review"
+
+#: .\templates\store\game_detail.html:363
+msgid "Оценка"
+msgstr "Rating"
+
+#: .\templates\store\game_detail.html:381
+msgid "Обновите отзыв"
+msgstr "Update review"
+
+#: .\templates\store\game_detail.html:383 .\templates\store\settings.html:74
+msgid "Сохранить"
+msgstr "Save"
+
+#: .\templates\store\game_detail.html:389 .\templates\store\profile.html:199
+msgid "Пока нет отзывов."
+msgstr "No reviews yet."
+
+#: .\templates\store\game_detail.html:397
+#, python-format
+msgid "Стр. %(num)s из %(total)s"
+msgstr "Pg. %(num)s of %(total)s"
+
+#: .\templates\store\game_list.html:9
+msgid "Фильтры"
+msgstr "Filters"
+
+#: .\templates\store\game_list.html:12 .\templates\store\game_list.html:13 .\templates\store\index.html:265
+msgid "Категории"
+msgstr "Categories"
+
+#: .\templates\store\game_list.html:30 .\templates\store\index.html:290
+msgid "Категории не найдены"
+msgstr "No categories found"
+
+#: .\templates\store\game_list.html:38
+msgid "Поиск"
+msgstr "Search"
+
+#: .\templates\store\game_list.html:39
+msgid "Поиск по названию..."
+msgstr "Search by title..."
+
+#: .\templates\store\game_list.html:43 .\templates\store\index.html:196
+msgid "Цена"
+msgstr "Price"
+
+#: .\templates\store\game_list.html:45
+msgid "От"
+msgstr "From"
+
+#: .\templates\store\game_list.html:46
+msgid "До"
+msgstr "To"
+
+#: .\templates\store\game_list.html:51
+msgid "Платформа"
+msgstr "Platform"
+
+#: .\templates\store\game_list.html:57
+msgid "Фильтр платформы включён."
+msgstr "Platform filter enabled."
+
+#: .\templates\store\game_list.html:61
+msgid "Показать"
+msgstr "Show"
+
+#: .\templates\store\game_list.html:62 .\templates\store\library.html:30 .\templates\store\wishlist.html:38
+msgid "Сбросить"
+msgstr "Reset"
+
+#: .\templates\store\game_list.html:87
+msgid "Магазин"
+msgstr "Store"
+
+#: .\templates\store\game_list.html:89
+msgid "Сортировать:"
+msgstr "Sort by:"
+
+#: .\templates\store\game_list.html:90
+msgid "Рейтинг ↓"
+msgstr "Rating ↓"
+
+#: .\templates\store\game_list.html:91
+msgid "Рейтинг ↑"
+msgstr "Rating ↑"
+
+#: .\templates\store\game_list.html:134 .\templates\store\recommendations.html:72
+msgid "Подробнее"
+msgstr "Details"
+
+#: .\templates\store\game_list.html:146
+msgid "No games yet — use the admin to add some."
+msgstr "No games yet — use the admin to add some."
+
+#: .\templates\store\index.html:26 .\templates\store\index.html:77
+msgid "Нет превью"
+msgstr "No preview"
+
+#: .\templates\store\index.html:43
+msgid "Популярное и рекомендуемое"
+msgstr "Popular and recommended"
+
+#: .\templates\store\index.html:219
+msgid "Предыдущий слайд"
+msgstr "Previous slide"
+
+#: .\templates\store\index.html:224
+msgid "Следующий слайд"
+msgstr "Next slide"
+
+#: .\templates\store\index.html:232
+msgid "Нет промо-материалов"
+msgstr "No promo materials"
+
+#: .\templates\store\index.html:272
+msgid "Предыдущие категории"
+msgstr "Previous categories"
+
+#: .\templates\store\index.html:287
+msgid "Следующие категории"
+msgstr "Next categories"
+
+#: .\templates\store\index.html:316
+msgid "Больше продуктов"
+msgstr "More products"
+
+#: .\templates\store\index.html:408
+msgid "Хиты продаж"
+msgstr "Top sellers"
+
+#: .\templates\store\index.html:455
+msgid "Новые релизы"
+msgstr "New releases"
+
+#: .\templates\store\library.html:6
+msgid "Моя библиотека"
+msgstr "My library"
+
+#: .\templates\store\library.html:9
+msgid "Сортировка"
+msgstr "Sort"
+
+#: .\templates\store\library.html:11
+msgid "По обновлению"
+msgstr "Updated recently"
+
+#: .\templates\store\library.html:12 .\templates\store\profile.html:121
+msgid "Недавние покупки"
+msgstr "Recent purchases"
+
+#: .\templates\store\library.html:13
+msgid "Старые покупки"
+msgstr "Older purchases"
+
+#: .\templates\store\library.html:14
+msgid "Время игры ↓"
+msgstr "Playtime ↓"
+
+#: .\templates\store\library.html:15
+msgid "Время игры ↑"
+msgstr "Playtime ↑"
+
+#: .\templates\store\library.html:16 .\templates\store\wishlist.html:32
+msgid "Название A→Z"
+msgstr "Title A→Z"
+
+#: .\templates\store\library.html:17 .\templates\store\wishlist.html:33
+msgid "Название Z→A"
+msgstr "Title Z→A"
+
+#: .\templates\store\library.html:21
+msgid "Мин. часов"
+msgstr "Min. hours"
+
+#: .\templates\store\library.html:25
+msgid "Макс. часов"
+msgstr "Max. hours"
+
+#: .\templates\store\library.html:29 .\templates\store\wishlist.html:37
+msgid "Применить"
+msgstr "Apply"
+
+#: .\templates\store\library.html:53
+msgid "Минут всего"
+msgstr "Total minutes"
+
+#: .\templates\store\library.html:54
+msgid "Последняя покупка"
+msgstr "Last purchase"
+
+#: .\templates\store\library.html:61
+msgid "Ещё нет купленных игр."
+msgstr "No purchased games yet."
+
+#: .\templates\store\profile.html:6
+msgid "Профиль закрыт"
+msgstr "Profile is private"
+
+#: .\templates\store\profile.html:7
+msgid "Владелец ограничил доступ к этому профилю."
+msgstr "The owner restricted access to this profile."
+
+#: .\templates\store\profile.html:40
+msgid "Убрать из друзей"
+msgstr "Remove friend"
+
+#: .\templates\store\profile.html:42
+msgid "Отменить заявку"
+msgstr "Cancel request"
+
+#: .\templates\store\profile.html:44
+msgid "Принять"
+msgstr "Accept"
+
+#: .\templates\store\profile.html:45
+msgid "Отклонить"
+msgstr "Reject"
+
+#: .\templates\store\profile.html:47
+msgid "Добавить в друзья"
+msgstr "Add friend"
+
+#: .\templates\store\profile.html:53
+msgid "Уровень"
+msgstr "Level"
+
+#: .\templates\store\profile.html:57
+#, python-format
+msgid "На платформе с %(join_date)s · Всего потрачено: %(spent)s %(cur)s · Игры: %(games)s · Вишлист: %(wl)s · Отзывы: %(reviews)s"
+msgstr "On the platform since %(join_date)s · Total spent: %(spent)s %(cur)s · Games: %(games)s · Wishlist: %(wl)s · Reviews: %(reviews)s"
+
+#: .\templates\store\profile.html:69
+msgid "Недавняя активность"
+msgstr "Recent activity"
+
+#: .\templates\store\profile.html:102
+msgid "Игра Steam"
+msgstr "Steam game"
+
+#: .\templates\store\profile.html:104
+msgid "Игра"
+msgstr "Game"
+
+#: .\templates\store\profile.html:106
+#, python-format
+msgid "последний запуск %(last)s"
+msgstr "last launched %(last)s"
+
+#: .\templates\store\profile.html:108
+#, python-format
+msgid "%(hours)s ч. всего за 2 недели"
+msgstr "%(hours)s h total over 2 weeks"
+
+#: .\templates\store\profile.html:114
+msgid "Недавняя активность отсутствует."
+msgstr "No recent activity."
+
+#: .\templates\store\profile.html:128
+msgid "Бейджи"
+msgstr "Badges"
+
+#: .\templates\store\profile.html:145
+msgid "Бейджи и уровни — декоративные."
+msgstr "Badges and levels are cosmetic."
+
+#: .\templates\store\profile.html:145
+msgid "Посмотреть все бейджи"
+msgstr "View all badges"
+
+#: .\templates\store\profile.html:154
+msgid "Открыть весь список"
+msgstr "Open full list"
+
+#: .\templates\store\profile.html:162
+msgid "Последние отзывы"
+msgstr "Recent reviews"
+
+#: .\templates\store\profile.html:188
+#, python-format
+msgid "Оценка: %(rating)s / 5"
+msgstr "Rating: %(rating)s / 5"
+
+#: .\templates\store\profile.html:192
+#, python-format
+msgid "Полезно: +%(yes)s / -%(no)s"
+msgstr "Helpful: +%(yes)s / -%(no)s"
+
+#: .\templates\store\profile.html:206
+msgid "Комментарии"
+msgstr "Comments"
+
+#: .\templates\store\profile.html:226
+msgid "Оставить комментарий"
+msgstr "Leave a comment"
+
+#: .\templates\store\profile.html:227
+msgid "Отправить"
+msgstr "Submit"
+
+#: .\templates\store\profile.html:230
+msgid "Чтобы оставить комментарий,"
+msgstr "To leave a comment,"
+
+#: .\templates\store\profile.html:230
+msgid "войдите"
+msgstr "log in"
+
+#: .\templates\store\profile.html:252
+msgid "Бан/Разбан"
+msgstr "Ban/Unban"
+
+#: .\templates\store\profile.html:261
+msgid "Пока нет комментариев."
+msgstr "No comments yet."
+
+#: .\templates\store\profile.html:276
+msgid "Значки"
+msgstr "Badges"
+
+#: .\templates\store\profile.html:277
+msgid "Игры"
+msgstr "Games"
+
+#: .\templates\store\profile.html:278
+msgid "Желаемое"
+msgstr "Wishlist"
+
+#: .\templates\store\profile.html:279
+msgid "Обзоры"
+msgstr "Reviews"
+
+#: .\templates\store\profile.html:280
+msgid "Все значки →"
+msgstr "All badges →"
+
+#: .\templates\store\profile_settings.html:5
+msgid "Настройки профиля"
+msgstr "Profile settings"
+
+#: .\templates\store\recommendations.html:10
+msgid "На основе вашей библиотеки и жанров"
+msgstr "Based on your library and genres"
+
+#: .\templates\store\recommendations.html:13
+msgid "Сортировка (A/B):"
+msgstr "Sorting (A/B):"
+
+#: .\templates\store\recommendations.html:15
+msgid "Жанры↑"
+msgstr "Genres↑"
+
+#: .\templates\store\recommendations.html:17
+msgid "Рейтинг↑"
+msgstr "Rating↑"
+
+#: .\templates\store\recommendations.html:23
+msgid "Исключить жанры"
+msgstr "Exclude genres"
+
+#: .\templates\store\recommendations.html:77
+msgid "Удалить из списка желаемого"
+msgstr "Remove from wishlist"
+
+#: .\templates\store\recommendations.html:82
+msgid "Скрыть"
+msgstr "Hide"
+
+#: .\templates\store\recommendations.html:89
+msgid "Пока нет рекомендаций — добавьте несколько игр в библиотеку."
+msgstr "No recommendations yet — add some games to your library."
+
+#: .\templates\store\settings.html:24
+msgid "Разделы настроек"
+msgstr "Settings sections"
+
+#: .\templates\store\settings.html:28
+msgid "Редактировать профиль →"
+msgstr "Edit profile →"
+
+#: .\templates\store\settings.html:35
+msgid "Выберите язык интерфейса и предпочитаемую валюту."
+msgstr "Choose interface language and preferred currency."
+
+#: .\templates\store\settings.html:36
+msgid "Публичный код для добавления в друзья"
+msgstr "Public friend code to be added by others"
+
+#: .\templates\store\settings.html:37
+msgid "Код для друзей:"
+msgstr "Friend code:"
+
+#: .\templates\store\settings.html:38 .\templates\store\settings.html:86
+msgid "Копировать"
+msgstr "Copy"
+
+#: .\templates\store\settings.html:42
+msgid "Управляйте видимостью профиля и взаимодействиями."
+msgstr "Manage profile visibility and interactions."
+
+#: .\templates\store\settings.html:45
+msgid "Что показывать внутри сайта и отправлять на email."
+msgstr "What to show on site and send by email."
+
+#: .\templates\store\settings.html:75
+msgid "Отмена"
+msgstr "Cancel"
+
+#: .\templates\store\wallet_topup.html:4
+msgid "Пополнение баланса"
+msgstr "Add funds"
+
+#: .\templates\store\wallet_topup.html:5
+msgid "Ваш текущий баланс"
+msgstr "Your current balance"
+
+#: .\templates\store\wallet_topup.html:9
+msgid "Сумма пополнения"
+msgstr "Top-up amount"
+
+#: .\templates\store\wallet_topup.html:13
+msgid "Валюта"
+msgstr "Currency"
+
+#: .\templates\store\wallet_topup.html:21
+msgid "Минимальное пополнение эквивалентно $1: для текущей валюты"
+msgstr "Minimum top-up equals $1 for current currency"
+
+#: .\templates\store\wallet_topup.html:23
+msgid "Конвертация в вашу предпочитаемую валюту произойдёт автоматически."
+msgstr "Conversion to your preferred currency happens automatically."
+
+#: .\templates\store\wallet_topup.html:25
+msgid "Пополнить"
+msgstr "Top up"
+
+#: .\templates\store\wallet_topup.html:29
+msgid "История транзакций"
+msgstr "Transaction history"
+
+#: .\templates\store\wallet_topup.html:32
+msgid "Тип операции"
+msgstr "Operation type"
+
+#: .\templates\store\wallet_topup.html:34
+msgid "Все"
+msgstr "All"
+
+#: .\templates\store\wallet_topup.html:35
+msgid "Пополнение"
+msgstr "Top-up"
+
+#: .\templates\store\wallet_topup.html:36
+msgid "Покупка"
+msgstr "Purchase"
+
+#: .\templates\store\wallet_topup.html:37
+msgid "Корректировка"
+msgstr "Adjustment"
+
+#: .\templates\store\wallet_topup.html:38
+msgid "Возврат"
+msgstr "Refund"
+
+#: .\templates\store\wallet_topup.html:42
+msgid "С даты"
+msgstr "From date"
+
+#: .\templates\store\wallet_topup.html:46
+msgid "По дату"
+msgstr "To date"
+
+#: .\templates\store\wallet_topup.html:50
+msgid "Фильтровать"
+msgstr "Filter"
+
+#: .\templates\store\wallet_topup.html:59
+msgid "Дата"
+msgstr "Date"
+
+#: .\templates\store\wallet_topup.html:60
+msgid "Тип"
+msgstr "Type"
+
+#: .\templates\store\wallet_topup.html:61
+msgid "Сумма"
+msgstr "Amount"
+
+#: .\templates\store\wallet_topup.html:62
+msgid "Баланс после"
+msgstr "Balance after"
+
+#: .\templates\store\wallet_topup.html:63
+msgid "Описание"
+msgstr "Description"
+
+#: .\templates\store\wallet_topup.html:78
+msgid "Нет транзакций по заданным фильтрам."
+msgstr "No transactions for given filters."
+
+#: .\templates\store\wallet_topup.html:88
+msgid "Стр."
+msgstr "Pg."
+
+#: .\templates\store\wallet_topup.html:88
+msgid "из"
+msgstr "of"
+
+#: .\templates\store\wallet_topup.html:95
+msgid "Операций пока нет."
+msgstr "No transactions yet."
+
+#: .\templates\store\wishlist.html:17
+msgid "Список желаемого:"
+msgstr "Wishlist:"
+
+#: .\templates\store\wishlist.html:21
+msgid "Поиск по названию"
+msgstr "Search by title"
+
+#: .\templates\store\wishlist.html:24
+msgid "Все платформы"
+msgstr "All platforms"
+
+#: .\templates\store\wishlist.html:30
+msgid "Сначала новые"
+msgstr "Newest first"
+
+#: .\templates\store\wishlist.html:31
+msgid "Сначала старые"
+msgstr "Oldest first"
+
+#: .\templates\store\wishlist.html:34
+msgid "Цена ↑"
+msgstr "Price ↑"
+
+#: .\templates\store\wishlist.html:35
+msgid "Цена ↓"
+msgstr "Price ↓"
+
+#: .\templates\store\wishlist.html:70
+msgid "Жанры не указаны"
+msgstr "Genres not specified"
+
+#: .\templates\store\wishlist.html:73
+msgid "Дата выхода:"
+msgstr "Release date:"
+
+#: .\templates\store\wishlist.html:79
+msgid "Добавлено на сайт:"
+msgstr "Added to site:"
+
+#: .\templates\store\wishlist.html:88
+msgid "Добавить в корзину"
+msgstr "Add to cart"
+
+#: .\templates\store\wishlist.html:100
+msgid "Ваш список желаемого пуст."
+msgstr "Your wishlist is empty."

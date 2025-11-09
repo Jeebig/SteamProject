@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+{% if is_private %}
+  <div class="bg-gray-900 rounded-lg p-8 text-center text-gray-300">
+    <h1 class="text-2xl font-semibold mb-2">Профиль закрыт</h1>
+    <p>Владелец ограничил доступ к этому профилю.</p>
+  </div>
+{% else %}
+  <div class="mb-6">
+    <h1 class="text-2xl font-semibold">Бейджи — {{ profile_user.username }}</h1>
+    <p class="text-sm text-gray-400">Наведите на бейдж, чтобы увидеть пороги тиров и ваш прогресс.</p>
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {% for b in badges %}
+    <div class="bg-gray-900 rounded-lg p-4 flex gap-4 items-center border border-[#0a1e24]">
+      <img src="{% static b.icon %}" class="w-16 h-16 rounded-full" alt="">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center justify-between gap-2">
+          <div class="font-semibold truncate">{{ b.title }}</div>
+          {% if b.tier %}<span class="text-xs bg-[#1b6b80] text-white px-2 py-0.5 rounded-full">T{{ b.tier }}</span>{% endif %}
+        </div>
+        <div class="text-sm text-blue-100 mt-1">{{ b.desc }}</div>
+        <div class="mt-2">
+          {% if b.next %}
+            <div class="w-full h-2 bg-gray-700 rounded overflow-hidden">
+              <div class="h-full bg-[#1b6b80]" style="width: {{ b.progress }}%"></div>
+            </div>
+            <div class="text-xs text-gray-400 mt-1">{{ b.value }} / {{ b.next }} до следующего тира</div>
+          {% else %}
+            <div class="text-xs text-green-300">Максимальный тир достигнут</div>
+          {% endif %}
+          <div class="text-xs text-gray-500 mt-1">Пороги: {{ b.steps|join:', ' }}</div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

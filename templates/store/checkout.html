@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static store_extras i18n %}
+{% block content %}
+<div class="grid grid-cols-12 gap-6">
+  <div class="col-span-12">
+    <div class="bg-gray-900 rounded-lg p-6 mb-6">
+  <h1 class="text-2xl font-bold mb-4">{% trans 'Оформление заказа' %}</h1>
+      {% if items %}
+        <div class="space-y-3">
+          {% for it in items %}
+          <div class="bg-gray-800 rounded p-3 flex items-center gap-4">
+            <div class="w-28 h-16 flex-shrink-0">
+              {% with g=it.game %}
+                {% with local_path="steam_imports/"|add:g.appid|add:"/header.jpg" %}
+                  {% if g.cover_image %}
+                    <img src="{{ g.cover_image.url }}" {% img_dims g.cover_image.url %} alt="{{ g.title }}" class="w-full h-full object-cover rounded">
+                  {% elif local_path|file_exists %}
+                    <img src="{{ MEDIA_URL }}steam_imports/{{ g.appid }}/header.jpg" {% img_dims MEDIA_URL|add:'steam_imports/'|add:g.appid|add:'/header.jpg' %} alt="{{ g.title }}" class="w-full h-full object-cover rounded">
+                  {% elif g.appid %}
+                    <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ g.appid }}/header.jpg" {% img_dims 'https://cdn.cloudflare.steamstatic.com/steam/apps/'|add:g.appid|add:'/header.jpg' %} alt="{{ g.title }}" class="w-full h-full object-cover rounded">
+                  {% else %}
+                    <div class="bg-gray-700 w-full h-full flex items-center justify-center rounded">{% trans 'Нет изображения' %}</div>
+                  {% endif %}
+                {% endwith %}
+              {% endwith %}
+            </div>
+            <div class="flex-1">
+              <div class="font-semibold">{{ it.game.title }}</div>
+              <div class="text-sm text-gray-400">{% if it.game.price|floatformat:2 == '0.00' %}{% trans 'Бесплатно' %}{% else %}{{ it.game.price|floatformat:2 }} {{ it.game.currency }} × {{ it.quantity }}{% endif %}</div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="mt-6 text-right text-lg font-semibold">
+          {% if subtotal|floatformat:2 == '0.00' %}
+            {% trans 'Итого:' %} {% trans 'Бесплатно' %}
+          {% else %}
+            {% trans 'Итого:' %} {{ subtotal|floatformat:2 }} {{ currency }}
+          {% endif %}
+          {% if preferred_currency and preferred_currency != currency %}
+            <span class="text-gray-400 text-sm ml-2">≈ {{ converted_subtotal|floatformat:2 }} {{ preferred_currency }}</span>
+          {% endif %}
+        </div>
+        <div class="mt-4 flex justify-end gap-3">
+          <a href="{% url 'store:cart' %}" class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600">{% trans 'Вернуться в корзину' %}</a>
+          <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="px-4 py-2 rounded bg-green-600 hover:bg-green-700 text-white">{% trans 'Подтвердить покупку' %}</button>
+          </form>
+        </div>
+      {% else %}
+  <p class="text-gray-400">{% trans 'Корзина пуста.' %}</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

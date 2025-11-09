@@ -1,0 +1,464 @@
+/* Popup for promo thumb preview */
+.promo-thumb-popup {
+  box-shadow: 0 12px 32px rgba(2, 6, 23, 0.22);
+  transition: opacity 0.18s, transform 0.18s;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1000;
+  min-width: 300px;
+  max-width: 380px;
+  margin-left: 0;
+  padding: 18px 18px 14px 18px;
+  background: #eaf2fa;
+  border-radius: 12px;
+  box-sizing: border-box;
+  overflow: visible;
+}
+
+.promo-thumb-wrap:hover .promo-thumb-popup,
+.promo-thumb-wrap:focus-within .promo-thumb-popup {
+  display: block !important;
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1000;
+}
+/* Arrow pointing from thumbnail to popup (left side) */
+.promo-thumb-popup::after {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 16px;
+  border-width: 10px 10px 10px 0;
+  border-style: solid;
+  border-color: transparent #eaf2fa transparent transparent;
+  width: 0;
+  height: 0;
+  z-index: 1002;
+}
+
+/* Styles for promo carousel and right panel layout */
+
+.promo-cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+}
+
+.promo-big-shadow {
+  /* kept for consistency with template */
+}
+
+.promo-outer {
+  position: static;
+  overflow: visible;
+}
+.promo-indicators {
+  gap: 8px;
+}
+.promo-dot {
+  width: 10px;
+  height: 8px;
+  border-radius: 4px;
+  background: #2a3946;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.promo-dot.active {
+  background: #b7c7d6;
+}
+
+/* Deals carousel / Steam-like 3-panel layout */
+.deals-carousel {
+  position: relative;
+}
+.deals-inner {
+  display: flex;
+  align-items: stretch;
+}
+.deal-left {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.deal-left .deal-media {
+  position: relative;
+  flex: 1 1 auto;
+  height: 100%;
+}
+.deal-left img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+.deal-left .p-4 {
+  padding: 16px;
+}
+.deal-right {
+  width: 320px;
+}
+.deal-small {
+  display: flex;
+  align-items: stretch;
+}
+.deal-small img {
+  object-fit: cover;
+}
+
+/* Badge and overlay styles */
+.deal-left .absolute.left-3.top-3 {
+  left: 12px;
+  top: 12px;
+}
+.deal-left .absolute.right-3.top-3 {
+  right: 12px;
+  top: 12px;
+}
+
+/* Buttons (arrows) */
+.deals-prev,
+.deals-next {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Responsive tweaks */
+@media (max-width: 900px) {
+  .deals-inner {
+    flex-direction: column;
+  }
+  .deal-right {
+    width: 100%;
+  }
+  .deal-left img {
+    height: 180px;
+  }
+  .deal-small {
+    height: 110px;
+  }
+}
+
+/* Info band on left big tile */
+.deal-info-band {
+  box-shadow: 0 -8px 24px rgba(2, 6, 23, 0.6);
+}
+.deal-info-left .text-lg {
+  font-size: 18px;
+}
+.discount-badge {
+  min-width: 120px;
+}
+.discount-percent {
+  display: block;
+}
+.discount-prices {
+  display: block;
+}
+.discount-prices .line-through {
+  opacity: 0.9;
+}
+
+/* Small polish to match Steam card look */
+.deals-carousel .deal-left {
+  border-radius: 6px;
+  overflow: hidden;
+}
+.deals-carousel .deal-small {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* Promo thumb popup: show on hover and animate */
+.promo-thumb-popup {
+  display: none;
+  opacity: 0;
+  transform: translateX(6px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.promo-thumb-wrap:hover .promo-thumb-popup {
+  display: block !important;
+  opacity: 1;
+  transform: translateX(0);
+}
+.promo-thumb-link img {
+  display: block;
+}
+
+/* Ensure deal info band floats above clickable overlay */
+.deal-info-band {
+  z-index: 20;
+}
+
+/* Make anchors that wrap tiles behave like blocks */
+.deal-small {
+  cursor: pointer;
+}
+.deal-small img {
+  min-width: 0;
+}
+
+.promo-slide {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 1rem;
+  position: relative;
+  overflow: visible;
+  background: none;
+}
+
+.promo-carousel-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #1b2838 #0b2630;
+}
+.promo-carousel-scroll::-webkit-scrollbar {
+  height: 8px;
+  background: #0b2630;
+}
+.promo-carousel-scroll::-webkit-scrollbar-thumb {
+  background: #1b2838;
+  border-radius: 4px;
+}
+
+.promo-outer .promo-slide > div {
+  /* ensure children stretch to the same height */
+  min-height: 0;
+}
+
+.promo-outer .promo-slide .md\:w-\[360px\],
+.promo-outer .promo-slide .md\:w-\[300px\],
+.promo-outer .promo-slide .md\:w-\[560px\] {
+  /* allow these fixed-width Tailwind utility classes to behave as intended */
+}
+
+.promo-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.promo-description {
+  /* clamp description to avoid overflow and keep layout tidy */
+  display: -webkit-box;
+  -webkit-line-clamp: 6;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.promo-thumbs {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.promo-thumbs img {
+  width: 160px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 0.375rem;
+  /* matching tailwind rounded */
+  position: relative;
+  z-index: 30;
+}
+
+/* Indicators (dots) styling — pill-like small bars */
+.promo-outer {
+  position: relative;
+  overflow: hidden;
+}
+
+.promo-slide {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 1rem;
+  position: absolute;
+  inset: 0;
+}
+.promo-outer .indicators-wrap {
+  /* keep for backwards compatibility but override below */
+}
+
+/* Global indicators wrapper when rendered outside the promo block */
+.indicators-wrap {
+  position: static !important;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: -0.5rem;
+  /* almost touching banner */
+}
+
+/* Make the small 'Цена' label a bit brighter on dark bg so it's always readable */
+.promo-footer .text-sm {
+  color: #9fb7bf;
+}
+
+/* Make right panel content avoid overflow */
+.promo-outer .promo-slide .promo-right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow: hidden;
+  /* right panel: fixed maximum width so it doesn't shrink below readable size */
+  /* increase right panel width so the right column is visually larger and reaches closer to the arrow */
+  flex: 0 0 420px;
+  max-width: 420px;
+}
+
+/* Left panel flexible: fills remaining space. This makes the layout adaptive — left grows/shrinks while right stays at max width.
+   Using flex:1 ensures the left image area keeps correct aspect and prevents 'jerk' on slide change. */
+.promo-left {
+  flex: 1 1 auto;
+  /* allow left to shrink a bit so right can take more room on medium widths */
+  min-width: 280px;
+  /* prevent left from collapsing on very small screens */
+}
+
+/* Price styling to ensure high contrast and visibility */
+.promo-right-panel .promo-price {
+  color: #ffffff;
+  font-weight: 700;
+  /* slightly smaller base font since we tweak pill padding separately */
+  font-size: 1.05rem;
+  display: inline-block;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.375rem;
+  background: rgba(0, 0, 0, 0.12);
+  line-height: 1;
+}
+
+.promo-right-panel .promo-price.free {
+  background: linear-gradient(180deg, #2fa66a, #1f8f54);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(31, 143, 84, 0.18);
+}
+
+/* Slightly lift thumbnails and add a subtle border/shadow for contrast */
+.promo-thumbs img {
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+@media (max-width: 767px) {
+  .promo-slide {
+    flex-direction: column;
+  }
+
+  .promo-outer .indicators-wrap {
+    left: 1rem;
+    bottom: 0.75rem;
+  }
+
+  /* On small screens, let both panels be full width stacked */
+  .promo-left,
+  .promo-outer .promo-slide .promo-right-panel {
+    flex: 0 0 auto;
+    max-width: 100%;
+  }
+}
+
+/* Categories carousel styles (added) */
+.categories-section .categories-carousel {
+  position: relative;
+}
+.categories-section .cat-track {
+  display: flex;
+  -webkit-overflow-scrolling: touch;
+  overflow: auto;
+}
+.categories-section .category-card {
+  box-shadow: 0 8px 22px rgba(2, 6, 23, 0.35);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 180ms ease, box-shadow 220ms ease,
+    outline-color 180ms ease;
+  outline: 1px solid rgba(255, 255, 255, 0.06);
+}
+.categories-section .category-card:hover .bg {
+  transform: scale(1.07);
+}
+.categories-section .category-card .bg {
+  background-size: cover;
+  background-position: center;
+  filter: saturate(1.05) contrast(1.05);
+  transform: scale(1.02);
+  transition: transform 300ms ease;
+}
+.categories-section .category-card .category-gradient {
+  background: linear-gradient(
+    180deg,
+    rgba(6, 19, 27, 0.05) 0%,
+    rgba(6, 19, 27, 0.35) 40%,
+    rgba(6, 19, 27, 0.85) 100%
+  );
+}
+.categories-section .category-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 34px rgba(2, 6, 23, 0.55);
+}
+.categories-section .category-card:focus-visible {
+  outline: 2px solid rgba(183, 199, 214, 0.9);
+  outline-offset: 1px;
+}
+.categories-section .category-label {
+  display: inline-block;
+  padding: 8px 12px;
+  border-radius: 10px;
+  color: #e8f2f7;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.2px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.18),
+    rgba(255, 255, 255, 0.1)
+  );
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+.categories-section .category-label:hover {
+  filter: brightness(1.03);
+}
+.categories-section .cat-prev,
+.categories-section .cat-next {
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.categories-section .cat-prev:hover,
+.categories-section .cat-next:hover {
+  transform: scale(1.05);
+}
+
+@media (max-width: 640px) {
+  .categories-section .cat-prev,
+  .categories-section .cat-next {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+/* --- Homepage cards: ensure consistent media sizing and cropping --- */
+.home-grid .card-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+}
+.home-grid .card-media img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+<style>
+  .settings-layout{display:grid;grid-template-columns:220px 1fr;gap:1.5rem;}
+  @media (max-width:900px){.settings-layout{grid-template-columns:1fr;}}
+  .settings-nav a{display:block;padding:.6rem .75rem;border-radius:4px;font-size:.875rem;font-weight:500;line-height:1.2;margin-bottom:.35rem;background:#0f2b36;color:#a0c8d6;border:1px solid #0a1e24;transition:background .15s,color .15s,box-shadow .15s;text-decoration:none;}
+  .settings-nav a.active{background:var(--active-bg,#1b6b80);color:#fff;box-shadow:0 0 0 1px #1b6b80,0 0 0 2px #0a1e24,0 6px 18px -4px rgba(0,0,0,.55);} 
+  .settings-nav a:hover:not(.active){background:#124351;color:#fff;}
+  .settings-card{background:#0b2230;border:1px solid #0a1e24;border-radius:6px;padding:1.25rem 1.4rem;box-shadow:0 8px 32px -8px rgba(0,0,0,.55);} 
+  .settings-card h2{font-size:1.05rem;margin-bottom:.85rem;font-weight:600;}
+  .settings-form .input, .settings-form select.input, .settings-form select, .settings-form input[type=text], .settings-form input[type=number]{background:#ffffff !important;color:#000 !important;border:1px solid #1c4a5b !important;border-radius:4px !important;padding:0.45rem 0.55rem !important;font-size:.875rem !important;}
+  .settings-form .input:focus, .settings-form select:focus{outline:none;box-shadow:0 0 0 2px rgba(56,189,248,.35);border-color:#38bdf8;}
+  .settings-form label span.lbl{display:block;font-size:.70rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:#fff;margin-bottom:.25rem;}
+  .pref-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.6rem;}
+  .pref-item{display:flex;align-items:center;gap:.55rem;background:#193543;border:1px solid #0a1e24;padding:.55rem .6rem;border-radius:5px;font-size:.75rem;line-height:1.15;cursor:pointer;transition:background .15s,border-color .15s;}
+  .pref-item input[type=checkbox]{width:16px;height:16px;accent-color:#1b6b80;}
+  .pref-item:hover{background:#215162;border-color:#1b6b80;}
+  .friend-code-box{background:#193543;border:1px dashed #1b6b80;padding:.6rem .75rem;border-radius:4px;font-size:.75rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem;}
+  .copy-btn{background:#1b6b80;color:#fff;border:none;padding:.35rem .65rem;font-size:.70rem;border-radius:4px;cursor:pointer;}
+  .copy-btn:hover{opacity:.85;}
+</style>
+<div class="settings-layout" id="settings-root" style="--active-bg: {{ profile.theme_color|default:'#1b6b80' }}">
+  <nav class="settings-nav" aria-label="{% trans 'Разделы настроек' %}">
+    {% for item in nav_items %}
+      <a href="{{ item.url }}" class="{% if item.key == active_section %}active{% endif %}">{{ item.title }}</a>
+    {% endfor %}
+    <a href="{% url 'store:profile_edit' %}" class="mt-4" style="margin-top:1.1rem">{% trans 'Редактировать профиль →' %}</a>
+  </nav>
+  <div>
+    <h1 class="text-2xl font-semibold mb-4">{% trans 'Настройки' %}</h1>
+    <div class="settings-card">
+      {% if active_section == 'general' %}
+        <h2>{% trans 'Общие' %}</h2>
+        <p class="text-xs text-gray-300 mb-4">{% trans 'Выберите язык интерфейса и предпочитаемую валюту.' %}</p>
+        <div class="friend-code-box mb-4" title="{% trans 'Публичный код для добавления в друзья' %}">
+          <span>{% trans 'Код для друзей:' %} <strong>{{ friend_code }}</strong></span>
+          <button type="button" class="copy-btn" data-copy="{{ friend_code }}">{% trans 'Копировать' %}</button>
+        </div>
+      {% elif active_section == 'privacy' %}
+        <h2>{% trans 'Приватность' %}</h2>
+        <p class="text-xs text-gray-300 mb-4">{% trans 'Управляйте видимостью профиля и взаимодействиями.' %}</p>
+      {% elif active_section == 'notifications' %}
+        <h2>{% trans 'Уведомления' %}</h2>
+        <p class="text-xs text-gray-300 mb-4">{% trans 'Что показывать внутри сайта и отправлять на email.' %}</p>
+      {% endif %}
+      <form method="post" class="settings-form space-y-6" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="text-red-400 text-sm">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <div class="space-y-4">
+          {% for field in form.visible_fields %}
+            {% if active_section == 'notifications' %}
+              <label class="pref-item" for="id_{{ field.name }}">
+                {{ field }}
+                <span>{{ field.label }}</span>
+              </label>
+            {% else %}
+              <label class="block" for="id_{{ field.name }}">
+                <span class="lbl">{{ field.label }}</span>
+                {{ field }}
+                {% if field.help_text %}<p class="text-[11px] text-gray-400 mt-1">{{ field.help_text }}</p>{% endif %}
+                {% if field.errors %}
+                  <ul class="mt-1 text-xs text-red-400">
+                    {% for err in field.errors %}<li>{{ err }}</li>{% endfor %}
+                  </ul>
+                {% endif %}
+              </label>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="pt-2 flex items-center gap-4">
+          <button class="bg-[#1b6b80] hover:bg-[#155567] transition px-5 py-2 rounded text-sm font-semibold shadow" type="submit">{% trans 'Сохранить' %}</button>
+          <a href="{% url 'store:profile' request.user.username %}" class="text-sm text-gray-300 hover:underline">{% trans 'Отмена' %}</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  document.querySelectorAll('[data-copy]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const val = btn.getAttribute('data-copy');
+      try { navigator.clipboard.writeText(val); btn.textContent = btn.textContent.replace(/Копировать|Copy/i,'✓'); setTimeout(()=>{ btn.textContent = btn.getAttribute('data-copy-label')||'{{ _('Копировать') }}'; },1400); } catch(e){ }
+    });
+    btn.setAttribute('data-copy-label', btn.textContent);
+  });
+})();
+</script>
+{% endblock %}

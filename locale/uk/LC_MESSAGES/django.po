@@ -1,0 +1,233 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: steam-clone\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-09 17:33+0200\n"
+"PO-Revision-Date: 2025-11-09 00:00+0000\n"
+"Last-Translator: YOU <you@example.com>\n"
+"Language-Team: Ukrainian <you@example.com>\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Core labels
+msgid "Бесплатно"
+msgstr "Безкоштовно"
+
+# Settings sections
+msgid "Общие"
+msgstr "Загальні"
+
+msgid "Приватность"
+msgstr "Приватність"
+
+msgid "Уведомления"
+msgstr "Сповіщення"
+
+# Status messages
+msgid "Настройки сохранены."
+msgstr "Налаштування збережено."
+
+msgid "Исправьте ошибки формы."
+msgstr "Виправте помилки форми."
+
+# Base navigation
+msgid "МАГАЗИН"
+msgstr "МАГАЗИН"
+
+msgid "Навигация магазина"
+msgstr "Навігація магазину"
+
+msgid "Главная"
+msgstr "Головна"
+
+msgid "Чарты"
+msgstr "Чарти"
+
+msgid "Рекомендации"
+msgstr "Рекомендації"
+
+msgid "Список желаемого"
+msgstr "Список бажаного"
+
+msgid "Информация"
+msgstr "Інформація"
+
+msgid "БИБЛИОТЕКА"
+msgstr "БІБЛІОТЕКА"
+
+msgid "ПОДДЕРЖКА"
+msgstr "ПІДТРИМКА"
+
+msgid "Поиск по магазину"
+msgstr "Пошук по магазину"
+
+msgid "Активный язык"
+msgstr "Активна мова"
+
+msgid "Баланс кошелька"
+msgstr "Баланс гаманця"
+
+msgid "Меню аккаунта"
+msgstr "Меню акаунта"
+
+msgid "Профиль"
+msgstr "Профіль"
+
+msgid "Мои заказы"
+msgstr "Мої замовлення"
+
+msgid "Кошелёк"
+msgstr "Гаманець"
+
+msgid "Друзья"
+msgstr "Друзі"
+
+msgid "Подписки"
+msgstr "Підписки"
+
+msgid "Редактировать профиль"
+msgstr "Редагувати профіль"
+
+msgid "Настройки"
+msgstr "Налаштування"
+
+msgid "Выйти"
+msgstr "Вийти"
+
+msgid "Корзина"
+msgstr "Кошик"
+
+msgid "Войти"
+msgstr "Увійти"
+
+# Login
+msgid "Вход в аккаунт"
+msgstr "Вхід в аккаунт"
+
+msgid "Имя аккаунта или email"
+msgstr "Ім'я акаунта або email"
+
+msgid "Пароль"
+msgstr "Пароль"
+
+msgid "Помогите, я не могу войти в аккаунт"
+msgstr "Допоможіть, я не можу увійти в аккаунт"
+
+msgid "Первый раз у нас?"
+msgstr "Вперше у нас?"
+
+msgid "Создать аккаунт"
+msgstr "Створити аккаунт"
+
+# Wishlist
+msgid "Список желаемого:"
+msgstr "Список бажаного:"
+
+msgid "Поиск по названию"
+msgstr "Пошук за назвою"
+
+msgid "Все платформы"
+msgstr "Всі платформи"
+
+msgid "Сначала новые"
+msgstr "Спочатку нові"
+
+msgid "Сначала старые"
+msgstr "Спочатку старі"
+
+msgid "Цена ↑"
+msgstr "Ціна ↑"
+
+msgid "Цена ↓"
+msgstr "Ціна ↓"
+
+msgid "Жанры не указаны"
+msgstr "Жанри не вказані"
+
+msgid "Дата выхода:"
+msgstr "Дата виходу:"
+
+msgid "Добавлено на сайт:"
+msgstr "Додано на сайт:"
+
+msgid "Добавить в корзину"
+msgstr "Додати до кошика"
+
+msgid "Ваш список желаемого пуст."
+msgstr "Ваш список бажаного порожній."
+
+# Cart/Checkout
+msgid "Ваша корзина"
+msgstr "Ваш кошик"
+
+msgid "Количество"
+msgstr "Кількість"
+
+msgid "Обновить"
+msgstr "Оновити"
+
+msgid "Продолжить покупки"
+msgstr "Продовжити покупки"
+
+msgid "Перейти к оплате"
+msgstr "Перейти до оплати"
+
+msgid "Удалить все товары"
+msgstr "Видалити всі товари"
+
+msgid "Ваша корзина пуста."
+msgstr "Ваш кошик порожній."
+
+msgid "Рекомендации для вас"
+msgstr "Рекомендації для вас"
+
+msgid "Нет рекомендаций"
+msgstr "Немає рекомендацій"
+
+msgid "Общая стоимость"
+msgstr "Загальна вартість"
+
+msgid "Налог с продаж рассчитывается при оформлении покупки в регионах, где он применим."
+msgstr "Податок з продажу розраховується при оформленні покупки в регіонах, де він застосовується."
+
+msgid "Оформление заказа"
+msgstr "Оформлення замовлення"
+
+msgid "Итого:"
+msgstr "Разом:"
+
+msgid "Вернуться в корзину"
+msgstr "Повернутися до кошика"
+
+msgid "Подтвердить покупку"
+msgstr "Підтвердити покупку"
+
+msgid "Корзина пуста."
+msgstr "Кошик порожній."
+
+# Friends
+msgid "Мои друзья"
+msgstr "Мої друзі"
+
+msgid "Добавить друга по ID"
+msgstr "Додати друга за ID"
+
+msgid "Поделитесь своим ID, чтобы вас могли добавить. ID не меняется при смене ника."
+msgstr "Поділіться своїм ID, щоб вас могли додати. ID не змінюється при зміні ніку."
+
+msgid "Ваш ID"
+msgstr "Ваш ID"
+
+msgid "Скопировать ID"
+msgstr "Скопіювати ID"
+
+msgid "Введите ID друга..."
+msgstr "Введіть ID друга..."
+
+msgid "Добавить"
+msgstr "Додати"
+
+msgid "Поиск друга..."
+msgstr "Пошук друга..."

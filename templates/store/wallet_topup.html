@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load i18n store_extras %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{% trans 'Пополнение баланса' %}</h1>
+<p class="mb-4 text-sm text-gray-300">{% trans 'Ваш текущий баланс' %}: <span class="font-mono">{{ balance|floatformat:2 }} {{ preferred_currency }}</span></p>
+<form action="" method="post" class="space-y-4 max-w-md bg-[#0f2b36] p-4 rounded border border-[#1c4a5b]">
+    {% csrf_token %}
+    <div>
+        <label class="block text-sm mb-1" for="amount">{% trans 'Сумма пополнения' %}</label>
+        <input type="number" step="0.01" min="0" name="amount" id="amount" required class="w-full px-3 py-2 rounded bg-[#09313d] text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-600" placeholder="{{ min_topup_by_currency|default:'1.00'|get_item:preferred_currency }}">
+    </div>
+    <div>
+        <label class="block text-sm mb-1" for="currency">{% trans 'Валюта' %}</label>
+        <select name="currency" id="currency" class="w-full px-3 py-2 rounded bg-[#09313d] text-gray-100 focus:outline-none focus:ring-2 focus:ring-cyan-600">
+            {% for code,label in currency_choices %}
+                <option value="{{ code }}" {% if code == preferred_currency %}selected{% endif %}>{{ code }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <p class="text-xs text-gray-400">
+        {% trans 'Минимальное пополнение эквивалентно $1: для текущей валюты' %}
+        <span class="font-mono">{{ min_topup_by_currency|get_item:preferred_currency }} {{ preferred_currency }}</span>.
+        {% trans 'Конвертация в вашу предпочитаемую валюту произойдёт автоматически.' %}
+    </p>
+    <button type="submit" class="px-4 py-2 bg-cyan-700 hover:bg-cyan-600 rounded text-white font-semibold">{% trans 'Пополнить' %}</button>
+</form>
+
+<div class="mt-10">
+    <h2 class="text-xl font-semibold mb-4">{% trans 'История транзакций' %}</h2>
+    <form method="get" class="mb-4 flex flex-wrap gap-3 items-end bg-[#0d3946] p-3 rounded">
+        <div>
+            <label class="text-xs text-gray-300" for="kind">{% trans 'Тип операции' %}</label>
+            <select name="kind" id="kind" class="mt-1 bg-[#09313d] text-gray-100 text-sm px-2 py-1 rounded">
+                <option value="">{% trans 'Все' %}</option>
+                <option value="topup" {% if tx_filters.kind == 'topup' %}selected{% endif %}>{% trans 'Пополнение' %}</option>
+                <option value="purchase_deduct" {% if tx_filters.kind == 'purchase_deduct' %}selected{% endif %}>{% trans 'Покупка' %}</option>
+                <option value="manual_adjust" {% if tx_filters.kind == 'manual_adjust' %}selected{% endif %}>{% trans 'Корректировка' %}</option>
+                <option value="refund" {% if tx_filters.kind == 'refund' %}selected{% endif %}>{% trans 'Возврат' %}</option>
+            </select>
+        </div>
+        <div>
+            <label class="text-xs text-gray-300" for="date_from">{% trans 'С даты' %}</label>
+            <input type="date" name="date_from" id="date_from" value="{{ tx_filters.date_from }}" class="mt-1 bg-[#09313d] text-gray-100 text-sm px-2 py-1 rounded" />
+        </div>
+        <div>
+            <label class="text-xs text-gray-300" for="date_to">{% trans 'По дату' %}</label>
+            <input type="date" name="date_to" id="date_to" value="{{ tx_filters.date_to }}" class="mt-1 bg-[#09313d] text-gray-100 text-sm px-2 py-1 rounded" />
+        </div>
+        <div class="flex gap-2 items-center">
+            <button type="submit" class="mt-1 px-3 py-1.5 bg-cyan-700 hover:bg-cyan-600 text-white text-sm rounded">{% trans 'Фильтровать' %}</button>
+            <a href="?" class="mt-1 px-3 py-1.5 bg-[#1c4a5b] hover:bg-[#155061] text-white text-sm rounded">{% trans 'Сброс' %}</a>
+        </div>
+    </form>
+    {% if wallet_transactions %}
+        <div class="overflow-x-auto border border-[#1c4a5b] rounded">
+            <table class="min-w-full text-sm">
+                <thead class="bg-[#0f2b36] text-gray-300">
+                    <tr>
+                        <th class="text-left p-2">{% trans 'Дата' %}</th>
+                        <th class="text-left p-2">{% trans 'Тип' %}</th>
+                        <th class="text-right p-2">{% trans 'Сумма' %}</th>
+                        <th class="text-right p-2">{% trans 'Баланс после' %}</th>
+                        <th class="text-left p-2">{% trans 'Описание' %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#123a46]">
+                {% for t in wallet_transactions.object_list %}
+                    <tr>
+                        <td class="p-2 whitespace-nowrap">{{ t.created_at|date:'Y-m-d H:i' }}</td>
+                        <td class="p-2">{{ t.get_kind_display }}</td>
+                        <td class="p-2 text-right">
+                            <span class="font-mono {% if t.amount < 0 %}text-red-300{% else %}text-green-300{% endif %}">{{ t.amount|floatformat:2 }} {{ t.currency }}</span>
+                        </td>
+                        <td class="p-2 text-right"><span class="font-mono">{{ t.balance_after|floatformat:2 }} {{ t.currency }}</span></td>
+                        <td class="p-2 text-gray-300">{{ t.description }}</td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="5" class="p-4 text-center text-gray-400">{% trans 'Нет транзакций по заданным фильтрам.' %}</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if wallet_transactions.paginator.num_pages > 1 %}
+        <div class="mt-4 flex items-center gap-3 text-sm">
+            {% if wallet_transactions.has_previous %}
+                <a class="px-2 py-1 bg-[#0f2b36] hover:bg-[#154451] rounded" href="?page={{ wallet_transactions.previous_page_number }}&kind={{ tx_filters.kind }}&date_from={{ tx_filters.date_from }}&date_to={{ tx_filters.date_to }}">← {% trans 'Назад' %}</a>
+            {% endif %}
+            <span class="text-gray-300">{% trans 'Стр.' %} {{ wallet_transactions.number }} {% trans 'из' %} {{ wallet_transactions.paginator.num_pages }}</span>
+            {% if wallet_transactions.has_next %}
+                <a class="px-2 py-1 bg-[#0f2b36] hover:bg-[#154451] rounded" href="?page={{ wallet_transactions.next_page_number }}&kind={{ tx_filters.kind }}&date_from={{ tx_filters.date_from }}&date_to={{ tx_filters.date_to }}">{% trans 'Вперёд' %} →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    {% else %}
+        <p class="text-gray-400">{% trans 'Операций пока нет.' %}</p>
+    {% endif %}
+</div>
+{% endblock %}

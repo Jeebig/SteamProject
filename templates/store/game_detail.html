@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+{% load static store_extras i18n %}
+
+{% block content %}
+{% now 'U' as nowts %}
+<link rel="stylesheet" href="{% static 'store/detail.css' %}?v=20251106b">
+<div class="page game-detail">
+    <div class="layout">
+        <!-- Left column -->
+        <section class="left">
+            <h1 class="title">{{ game.title }}</h1>
+            {% if game.developer %}
+                <div class="subtitle">{{ game.developer.name }}</div>
+            {% endif %}
+
+            <!-- Media viewer -->
+            <div class="media-viewer">
+                {% if game.appid %}
+                    <img id="mainMedia" src="/media/steam_imports/{{ game.appid }}/header.jpg?v={{ nowts }}" alt="{{ game.title }}" class="media-main" onerror="this.onerror=null;this.src='{% if game.cover_image %}{{ game.cover_image.url }}{% else %}{% static 'store/img/placeholder.svg' %}{% endif %}'" />
+                {% elif game.cover_image %}
+                    <img id="mainMedia" src="{{ game.cover_image.url }}" alt="{{ game.title }}" class="media-main" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'" />
+                {% else %}
+                    <img id="mainMedia" src="{% static 'store/img/placeholder.svg' %}" alt="{{ game.title }}" class="media-main" />
+                {% endif %}
+
+                {% if game.screenshots.all %}
+                <div class="thumbs">
+                    {% for ss in game.screenshots.all %}
+                        <button class="thumb" type="button" data-src="{{ ss.image.url }}" aria-label="{{ ss.caption|default:'Screenshot' }}">
+                            <img src="{{ ss.image.url }}" alt="{{ ss.caption }}">
+                        </button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                                <div class="mt-3 flex items-center gap-3 text-sm">
+                                    {% if user.is_authenticated and r.user_id == user.id and can_review %}
+                                        <form method="post" action="{% url 'store:review_delete' r.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="next" value="{{ request.get_full_path }}#reviews">
+                                            <button type="submit" class="btn" style="background:#5b232f">{% trans 'Удалить отзыв' %}</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+            </div>
+
+            <!-- Editions / purchase block (simple) -->
+            <div class="editions">
+                <div class="edition-card">
+                    <div class="edition-title">{% trans 'Стандартное издание' %}</div>
+                    <div class="edition-actions">
+                        <div class="price">
+                            {% if converted_price|floatformat:2 == '0.00' %}{% trans 'Бесплатно' %}{% else %}{{ converted_price }} {{ preferred_currency }}{% endif %}
+                        </div>
+                        {% if user.is_authenticated %}
+                            {% is_owned user game as owned_flag %}
+                            {% if owned_flag %}
+                              <span class="btn" style="background:#1f3d1f;cursor:default;">{% trans 'В библиотеке' %}</span>
+                            {% else %}
+                            <form action="{% url 'store:cart_add' game.slug %}" method="post" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <button type="submit" class="btn green">{% trans 'В корзину' %}</button>
+                            </form>
+                            {% endif %}
+                            <form action="{% url 'store:wishlist_toggle' game.slug %}" method="post" class="inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <button type="submit" class="btn wish">{% trans 'В желаемое' %}</button>
+                            </form>
+                        {% else %}
+                            <a class="btn blue" href="{% url 'login' %}?next={{ request.path }}">{% trans 'Войдите для покупки' %}</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="description">
+                {{ game.description|safe }}
+            </div>
+
+            <!-- System requirements -->
+            <div class="sysreq">
+                <h2>{% trans 'СИСТЕМНЫЕ ТРЕБОВАНИЯ' %}</h2>
+                <div class="sysreq-grid">
+                    <div class="col">
+                        <h3>{% trans 'МИНИМАЛЬНЫЕ:' %}</h3>
+                        <div class="sysreq-text {% if not game.sysreq_min %}empty{% endif %}">
+                            {% if game.sysreq_min %}{{ game.sysreq_min|linebreaksbr }}{% else %}{% trans 'Информация не указана' %}{% endif %}
+                        </div>
+                    </div>
+                    <div class="col">
+                        <h3>{% trans 'РЕКОМЕНДУЕМЫЕ:' %}</h3>
+                        <div class="sysreq-text {% if not game.sysreq_rec %}empty{% endif %}">
+                            {% if game.sysreq_rec %}{{ game.sysreq_rec|linebreaksbr }}{% else %}{% trans 'Информация не указана' %}{% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- More from developer carousel -->
+                    {% if more_from_developer %}
+                    <div class="carousel">
+                                <div class="carousel-header flex items-center justify-between">
+                                    <h2>{{ game.developer.name }}: {% trans 'БОЛЬШЕ ПРОДУКТОВ' %}</h2>
+                                    <div class="flex items-center gap-2">
+                                        <button class="btn subtle" type="button" aria-pressed="false">{% trans 'Подписаться' %}</button>
+                                        <a class="btn" href="{% url 'store:game_list' %}?developer={{ game.developer.slug }}">{% trans 'Просмотреть все' %}</a>
+                                    </div>
+                                </div>
+                        <button class="carousel-arrow left" data-target="dev" aria-label="{% trans 'Назад' %}">‹</button>
+                        <button class="carousel-arrow right" data-target="dev" aria-label="{% trans 'Вперёд' %}">›</button>
+                        <div class="carousel-track" data-carousel="dev">
+                    {% for g in more_from_developer %}
+                        <a href="{% url 'store:game_detail' g.slug %}" class="card">
+                            {% if g.appid %}
+                                <img src="/media/steam_imports/{{ g.appid }}/header.jpg?v={{ nowts }}" alt="{{ g.title }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{% if g.cover_image %}{{ g.cover_image.url }}{% else %}{% static 'store/img/placeholder.svg' %}{% endif %}'">
+                            {% elif g.cover_image %}
+                                <img src="{{ g.cover_image.url }}" alt="{{ g.title }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                            {% else %}
+                                <img src="{% static 'store/img/placeholder.svg' %}" alt="{{ g.title }}">
+                            {% endif %}
+                                    <div class="price-band">
+                                        {% if g.discount_percent and g.original_price %}
+                                            <span class="disc">-{{ g.discount_percent }}%</span>
+                                            <div class="prices"><span class="old">{{ g.original_price }} {{ g.currency }}</span><span class="new">{{ g.price }} {{ g.currency }}</span></div>
+                                        {% else %}
+                                            <div class="prices"><span class="new">{% if g.price|floatformat:2 == '0.00' %}{% trans 'Бесплатно' %}{% else %}{{ g.price }} {{ g.currency }}{% endif %}</span></div>
+                                        {% endif %}
+                                    </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Similar games carousel -->
+                    {% if similar_games %}
+                    <div class="carousel">
+                        <div class="carousel-header flex items-center justify-between"><h2>{% trans 'ПОХОЖИЕ ТОВАРЫ' %}</h2>
+                            <a class="btn" href="{% url 'store:game_list' %}?category={{ game.genres.first.slug|default:'' }}">{% trans 'Просмотреть все' %}</a>
+                        </div>
+                        <button class="carousel-arrow left" data-target="sim" aria-label="{% trans 'Назад' %}">‹</button>
+                        <button class="carousel-arrow right" data-target="sim" aria-label="Вперёд">›</button>
+                        <div class="carousel-track" data-carousel="sim">
+                    {% for g in similar_games %}
+                        <a href="{% url 'store:game_detail' g.slug %}" class="card">
+                            {% if g.appid %}
+                                <img src="/media/steam_imports/{{ g.appid }}/header.jpg?v={{ nowts }}" alt="{{ g.title }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{% if g.cover_image %}{{ g.cover_image.url }}{% else %}{% static 'store/img/placeholder.svg' %}{% endif %}'">
+                            {% elif g.cover_image %}
+                                <img src="{{ g.cover_image.url }}" alt="{{ g.title }}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                            {% else %}
+                                <img src="{% static 'store/img/placeholder.svg' %}" alt="{{ g.title }}">
+                            {% endif %}
+                                    <div class="price-band">
+                                        {% if g.discount_percent and g.original_price %}
+                                            <span class="disc">-{{ g.discount_percent }}%</span>
+                                            <div class="prices"><span class="old">{{ g.original_price }} {{ g.currency }}</span><span class="new">{{ g.price }} {{ g.currency }}</span></div>
+                                        {% else %}
+                                            <div class="prices"><span class="new">{% if g.price|floatformat:2 == '0.00' %}{% trans 'Бесплатно' %}{% else %}{{ g.price }} {{ g.currency }}{% endif %}</span></div>
+                                        {% endif %}
+                                    </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Right column -->
+        <aside class="right">
+            <div class="capsule">
+                {% if game.appid %}
+                    <img src="/media/steam_imports/{{ game.appid }}/header.jpg?v={{ nowts }}" alt="{{ game.title }}" onerror="this.onerror=null;this.src='{% if game.cover_image %}{{ game.cover_image.url }}{% else %}{% static 'store/img/placeholder.svg' %}{% endif %}'">
+                {% elif game.cover_image %}
+                    <img src="{{ game.cover_image.url }}" alt="{{ game.title }}" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                {% else %}
+                    <img src="{% static 'store/img/placeholder.svg' %}" alt="{{ game.title }}">
+                {% endif %}
+            </div>
+
+            {% if game.description %}
+                <div class="shortdesc">{{ game.description|striptags|truncatechars:300 }}</div>
+            {% endif %}
+
+            <div class="meta">
+                {% if game.developer %}
+                    <div><span class="muted">{% trans 'РАЗРАБОТЧИК:' %}</span> {{ game.developer.name }}</div>
+                {% endif %}
+                {% if game.release_date %}
+                    <div><span class="muted">{% trans 'ДАТА ВЫХОДА:' %}</span> {{ game.release_date }}</div>
+                {% endif %}
+                {% if game.genres.all %}
+                    <div><span class="muted">{% trans 'ЖАНРЫ:' %}</span>
+                        {% for genre in game.genres.all %}
+                            <a class="tag" href="{% url 'store:game_list' %}?category={{ genre.slug }}">{{ genre.name }}</a>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="platforms">
+                {% if game.supports_windows %}<span class="pf pf-windows" title="Windows"></span>{% endif %}
+                {% if game.supports_mac %}<span class="pf pf-macos" title="macOS"></span>{% endif %}
+                {% if game.supports_linux %}<span class="pf pf-linux" title="Linux"></span>{% endif %}
+            </div>
+
+                    <div class="buybox">
+                        {% if game.discount_percent and game.original_price %}
+                            <div class="price price-rich">
+                                <span class="disc">-{{ game.discount_percent }}%</span>
+                                <span class="old">{{ game.original_price }} {{ preferred_currency }}</span>
+                                <span class="new">{{ converted_price }} {{ preferred_currency }}</span>
+                            </div>
+                        {% else %}
+                            <div class="price">{% if converted_price|floatformat:2 == '0.00' %}{% trans 'Бесплатно' %}{% else %}{{ converted_price }} {{ preferred_currency }}{% endif %}</div>
+                        {% endif %}
+                {% if user.is_authenticated %}
+                    {% is_owned user game as owned_flag %}
+                    <div class="flex gap-2">
+                                                {% if owned_flag %}
+                                                    <span class="btn" style="background:#1f3d1f;cursor:default;">{% trans 'В библиотеке' %}</span>
+                                                {% else %}
+                                                    <form action="{% url 'store:cart_add' game.slug %}" method="post" class="inline">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                            <button type="submit" class="btn green">{% trans 'В корзину' %}</button>
+                                                    </form>
+                                                {% endif %}
+                                                <form action="{% url 'store:wishlist_toggle' game.slug %}" method="post" class="inline">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                                        <button type="submit" class="btn wish">{% trans 'В желаемое' %}</button>
+                                                </form>
+                    </div>
+                {% else %}
+                    <a class="btn blue" href="{% url 'login' %}?next={{ request.path }}">{% trans 'Войдите для покупки' %}</a>
+                {% endif %}
+            </div>
+
+            {% if reviews_count %}
+                <div class="reviews-agg">
+                                        <span class="score">{% n_reviews reviews_count %}</span>{% if reviews_avg %} <span class="muted">{% trans 'Средняя:' %}</span> {{ reviews_avg|floatformat:1 }}/5{% endif %}
+                                        {% if reviews_avg %}
+                                                            <div class="mt-2 rating-static" title="{% blocktrans with score=reviews_avg|floatformat:1 %}Средняя оценка: {{ score }} из 5{% endblocktrans %}">
+                                                                    {% stars as five %}
+                                                                    {% for i in five %}
+                                                                        {% with val=forloop.counter %}
+                                                                            {% star_fill reviews_avg val as fill %}
+                                                                            {% if fill == 'full' %}
+                                                                                <span>★</span>
+                                                                            {% elif fill == 'half' %}
+                                                                                <span class="star-half">★</span>
+                                                                            {% else %}
+                                                                                <span class="star-off">★</span>
+                                                                            {% endif %}
+                                                                        {% endwith %}
+                                                                    {% endfor %}
+                                                            </div>
+                                        {% endif %}
+                </div>
+            {% endif %}
+        </aside>
+    </div>
+
+        <!-- Reviews section -->
+        <div id="reviews" class="mt-8">
+                <h2 class="text-xl font-semibold mb-4">{% trans 'Отзывы' %}</h2>
+                {% if user.is_authenticated and can_review and not user_review %}
+                    <form method="post" action="{% url 'store:game_detail' game.slug %}#reviews" class="bg-gray-900 p-4 rounded mb-6">
+                        {% csrf_token %}
+                        <div class="flex items-center gap-3 mb-3">
+                            <label class="text-sm text-gray-300">{% trans 'Ваша оценка' %}</label>
+                            {% stars as five %}
+                            <div class="rating-stars" aria-label="Оценка 1–5 (шаг 0.5)" role="radiogroup">
+                                {% for i in five %}
+                                    <span class="star-slot">
+                                        {% if i > 1 %}
+                                            {% with hv=i|add:'-0.5' %}
+                                                <input id="rate-new-{{ hv|slugify }}" type="radio" name="rating" value="{{ hv }}" {% if hv == initial_rating|floatformat:1 %}checked{% endif %}>
+                                                <label class="half" for="rate-new-{{ hv|slugify }}" title="{% blocktrans with score=hv %}{{ score }} из 5{% endblocktrans %}">★</label>
+                                            {% endwith %}
+                                        {% endif %}
+                                        <input id="rate-new-{{ i }}" type="radio" name="rating" value="{{ i }}" {% if i|stringformat:'s' == initial_rating|floatformat:1 %}checked{% endif %}>
+                                        <label class="full" for="rate-new-{{ i }}" title="{% blocktrans with score=i %}{{ score }} из 5{% endblocktrans %}">★</label>
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                                <textarea name="text" rows="4" class="w-full px-3 py-2 rounded bg-gray-800 text-gray-100" placeholder="{% trans 'Поделитесь впечатлениями' %}">{{ initial_text }}</textarea>
+                        </div>
+                        <button type="submit" class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">{% trans 'Сохранить отзыв' %}</button>
+                    </form>
+                {% elif user.is_authenticated and not can_review %}
+                    <div class="bg-gray-900 p-4 rounded mb-6 text-gray-400">{% trans 'Оставлять отзывы могут только купившие игру.' %}</div>
+                {% elif not user.is_authenticated %}
+                    <div class="bg-gray-900 p-4 rounded mb-6 text-gray-400">{% trans 'Войдите, чтобы оставить отзыв.' %}</div>
+                {% endif %}
+
+                                <div class="flex items-center gap-3 mb-4">
+                                    <span class="text-sm text-gray-400">{% trans 'Сортировка:' %}</span>
+                                    <a class="btn subtle" href="?rsort=help#reviews">{% trans 'Полезности' %}</a>
+                                    <a class="btn subtle" href="?rsort=-date#reviews">{% trans 'Новые' %}</a>
+                                    <a class="btn subtle" href="?rsort=date#reviews">{% trans 'Старые' %}</a>
+                                </div>
+
+                                {% with page=reviews_page %}
+                                {% for r in page.object_list %}
+                    <div class="bg-gray-900 p-4 rounded mb-3">
+                        <div class="flex items-center justify-between">
+                            <div class="font-semibold">{{ r.user.username }}</div>
+                                                        <div class="rating-static" title="{% blocktrans with score=r.rating|floatformat:1 %}Оценка: {{ score }} из 5{% endblocktrans %}">
+                                                                {% stars as five %}
+                                                                {% for i in five %}
+                                                                        {% with val=forloop.counter %}
+                                                                            {% star_fill r.rating val as fill %}
+                                                                            {% if fill == 'full' %}
+                                                                                <span>★</span>
+                                                                            {% elif fill == 'half' %}
+                                                                                <span class="star-half">★</span>
+                                                                            {% else %}
+                                                                                <span class="star-off">★</span>
+                                                                            {% endif %}
+                                                                        {% endwith %}
+                                                                {% endfor %}
+                                                        </div>
+                        </div>
+                        {% if r.text %}
+                            <div class="mt-2 text-gray-200">{{ r.text|linebreaksbr }}</div>
+                        {% endif %}
+                                                <div class="mt-2 text-xs text-gray-500">{{ r.created_at|date:"Y-m-d H:i" }}</div>
+
+                                                <div class="mt-3 flex items-center gap-3 text-sm">
+                                                    {% if user.is_authenticated and r.user_id != user.id %}
+                                                        <form action="{% url 'store:review_vote' r.id %}" method="post" class="inline vote-form" data-review-id="{{ r.id }}">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="next" value="{{ request.get_full_path }}#reviews">
+                                                            <input type="hidden" name="vote" value="up">
+                                                              {% with uv=user_review_votes|get_item:r.id %}
+                                                              <button type="submit" class="btn subtle vote-btn up {% if uv == 'up' %}active{% endif %}">{% trans 'Полезен' %} (<span class="vote-yes">{{ r.helpful_yes|default:0 }}</span>)</button>
+                                                              {% endwith %}
+                                                        </form>
+                                                        <form action="{% url 'store:review_vote' r.id %}" method="post" class="inline vote-form" data-review-id="{{ r.id }}">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="next" value="{{ request.get_full_path }}#reviews">
+                                                            <input type="hidden" name="vote" value="down">
+                                                              {% with uv=user_review_votes|get_item:r.id %}
+                                                              <button type="submit" class="btn subtle vote-btn down {% if uv == 'down' %}active{% endif %}">{% trans 'Не полезен' %} (<span class="vote-no">{{ r.helpful_no|default:0 }}</span>)</button>
+                                                              {% endwith %}
+                                                        </form>
+                                                    {% else %}
+                                                        <span class="text-gray-500">{% blocktrans with yes=r.helpful_yes|default:0 no=r.helpful_no|default:0 %}Полезен: {{ yes }} · Не полезен: {{ no }}{% endblocktrans %}</span>
+                                                    {% endif %}
+                                                </div>
+
+                        {% if user.is_authenticated and r.user_id == user.id and can_review %}
+                          <details class="mt-3">
+                            <summary class="cursor-pointer text-sm text-blue-400 hover:text-blue-300">{% trans 'Редактировать отзыв' %}</summary>
+                            <form method="post" action="{% url 'store:game_detail' game.slug %}#reviews" class="mt-3">
+                              {% csrf_token %}
+                              <div class="flex items-center gap-3 mb-2">
+                                  <label class="text-sm text-gray-300">{% trans 'Оценка' %}</label>
+                                  {% stars as five %}
+                                  <div class="rating-stars" role="radiogroup" aria-label="Оценка 1–5 (шаг 0.5)">
+                                      {% for i in five %}
+                                          <span class="star-slot">
+                                              {% if i > 1 %}
+                                                  {% with hv=i|add:'-0.5' %}
+                                                      <input id="rate-edit-{{ r.id }}-{{ hv|slugify }}" type="radio" name="rating" value="{{ hv }}" {% if hv == r.rating|floatformat:1 %}checked{% endif %}>
+                                                      <label class="half" for="rate-edit-{{ r.id }}-{{ hv|slugify }}" title="{% blocktrans with score=hv %}{{ score }} из 5{% endblocktrans %}">★</label>
+                                                  {% endwith %}
+                                              {% endif %}
+                                              <input id="rate-edit-{{ r.id }}-{{ i }}" type="radio" name="rating" value="{{ i }}" {% if i|stringformat:'s' == r.rating|floatformat:1 %}checked{% endif %}>
+                                              <label class="full" for="rate-edit-{{ r.id }}-{{ i }}" title="{% blocktrans with score=i %}{{ score }} из 5{% endblocktrans %}">★</label>
+                                          </span>
+                                      {% endfor %}
+                                  </div>
+                              </div>
+                              <div class="mb-2">
+                                <textarea name="text" rows="3" class="w-full px-3 py-2 rounded bg-gray-800 text-gray-100" placeholder="{% trans 'Обновите отзыв' %}">{{ r.text }}</textarea>
+                              </div>
+                              <button type="submit" class="px-3 py-1.5 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm">{% trans 'Сохранить' %}</button>
+                            </form>
+                          </details>
+                        {% endif %}
+                    </div>
+                                {% empty %}
+                                        <div class="text-gray-400">{% trans 'Пока нет отзывов.' %}</div>
+                                {% endfor %}
+
+                                {% if page and page.paginator.num_pages > 1 %}
+                                    <div class="mt-4 flex items-center gap-2">
+                                        {% if page.has_previous %}
+                                                <a class="btn subtle" href="?rsort={{ rsort }}&rpage={{ page.previous_page_number }}#reviews">← {% trans 'Назад' %}</a>
+                                        {% endif %}
+                                        <span class="text-sm text-gray-400">{% blocktrans with num=page.number total=page.paginator.num_pages %}Стр. {{ num }} из {{ total }}{% endblocktrans %}</span>
+                                        {% if page.has_next %}
+                                                <a class="btn subtle" href="?rsort={{ rsort }}&rpage={{ page.next_page_number }}#reviews">{% trans 'Вперёд' %} →</a>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                                {% endwith %}
+        </div>
+</div>
+<script src="{% static 'store/detail.js' %}?v=20251106c"></script>
+{% endblock %}

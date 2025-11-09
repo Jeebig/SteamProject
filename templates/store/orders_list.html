@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <h1 class="text-2xl font-bold mb-4">Мои заказы</h1>
+  {% if orders %}
+    <div class="space-y-3">
+      {% for o in orders %}
+      <a href="{% url 'store:order_detail' o.id %}" class="block bg-gray-900 rounded p-4 hover:bg-gray-800">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-semibold">Заказ #{{ o.id }}</div>
+            <div class="text-sm text-gray-400">{{ o.created_at|date:"Y-m-d H:i" }} · {{ o.get_status_display }}</div>
+          </div>
+          <div class="text-lg font-bold">{{ o.total_price|floatformat:2 }} {{ o.currency }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="bg-gray-900 rounded p-6">Пока нет заказов.</div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static store_extras %}
+{% block content %}
+{% now 'U' as nowts %}
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+  <aside class="lg:col-span-1 bg-[#0f2a33] p-4 rounded-lg border border-[#072024]">
+    <h3 class="text-lg font-bold text-white mb-3">Скидки</h3>
+    <form method="get" class="space-y-4">
+      <div>
+        <label class="text-xs text-gray-400">Поиск</label>
+        <input type="search" name="q" value="{{ filters.q }}" placeholder="Название..." class="w-full mt-2 p-2 rounded bg-[#062025] text-white" />
+      </div>
+      <div>
+        <div class="text-xs text-gray-400">Платформа</div>
+        <select name="platform" class="w-full mt-2 p-2 rounded bg-[#062025] text-white">
+          <option value="">Все</option>
+          <option value="windows" {% if filters.platform == 'windows' or filters.platform == 'win' %}selected{% endif %}>Windows</option>
+          <option value="macos" {% if filters.platform == 'mac' or filters.platform == 'macos' %}selected{% endif %}>macOS</option>
+          <option value="linux" {% if filters.platform == 'linux' %}selected{% endif %}>Linux</option>
+        </select>
+      </div>
+      <div>
+        <div class="text-xs text-gray-400">Сортировка</div>
+        <select name="sort" class="w-full mt-2 p-2 rounded bg-[#062025] text-white">
+          <option value="-discount" {% if filters.sort == '-discount' %}selected{% endif %}>По убыванию скидки</option>
+          <option value="price" {% if filters.sort == 'price' %}selected{% endif %}>Цена ↑</option>
+          <option value="-price" {% if filters.sort == '-price' %}selected{% endif %}>Цена ↓</option>
+          <option value="title" {% if filters.sort == 'title' %}selected{% endif %}>Название A→Z</option>
+          <option value="-title" {% if filters.sort == '-title' %}selected{% endif %}>Название Z→A</option>
+        </select>
+      </div>
+      <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded">Показать</button>
+      <a href="{% url 'store:discounts' %}" class="block text-center px-3 py-2 rounded bg-[#0d3a46] text-white text-sm">Сбросить</a>
+    </form>
+  </aside>
+
+  <main class="lg:col-span-3">
+    <h1 class="text-3xl mb-4 text-white">Игры со скидкой</h1>
+    {% if games %}
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for g in games %}
+          <div class="bg-[#232f3e] p-3 rounded-lg">
+            {% if g.appid %}
+              <img src="/media/steam_imports/{{ g.appid }}/header.jpg?v={{ nowts }}" {% img_dims MEDIA_URL|add:'steam_imports/'|add:g.appid|add:'/header.jpg' %} alt="{{ g.title }}" class="w-full h-40 object-cover rounded" onerror="this.onerror=null;this.src='{% if g.cover_image %}{{ g.cover_image.url }}{% else %}{% static 'store/img/placeholder.svg' %}{% endif %}'" />
+            {% elif g.cover_image %}
+              <img src="{{ g.cover_image.url }}" {% img_dims g.cover_image.url %} alt="{{ g.title }}" class="w-full h-40 object-cover rounded" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'" />
+            {% else %}
+              <img src="{% static 'store/img/placeholder.svg' %}" alt="{{ g.title }}" class="w-full h-40 object-cover rounded" />
+            {% endif %}
+            <div class="mt-2">
+              <a class="text-lg text-white hover:underline" href="{% url 'store:game_detail' g.slug %}">{{ g.title }}</a>
+              <div class="text-sm text-gray-400">{% if g.developer %}{{ g.developer.name }}{% endif %}</div>
+            </div>
+            <div class="mt-2 flex items-center gap-2">
+              <div class="ml-auto text-base font-bold text-white">
+                {% price_display g.price g.currency preferred_currency g.original_price g.discount_percent %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="bg-gray-900 p-6 rounded">Скидок пока нет.</div>
+    {% endif %}
+  </main>
+</div>
+{% endblock %}

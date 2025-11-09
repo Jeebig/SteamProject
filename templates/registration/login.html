@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-[60vh] px-4">
+    <div class="bg-[#0f2a33] border border-[#072024] rounded-lg shadow-xl p-8 w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-6 text-center">{% trans "Вход в аккаунт" %}</h1>
+
+        {% if form.errors %}
+            <div class="mb-4 text-red-400 text-sm">
+                {% for field in form %}
+                    {% for error in field.errors %}{{ error }}<br>{% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}{{ error }}<br>{% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+                            <div>
+                                <label for="id_username" class="block text-sm mb-1">{% trans "Имя аккаунта или email" %}</label>
+                                {{ form.username }}
+                            </div>
+                            <div>
+                                <label for="id_password" class="block text-sm mb-1">{% trans "Пароль" %}</label>
+                                {{ form.password }}
+                            </div>
+            {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+            <button type="submit" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded">{% trans "Войти" %}</button>
+        </form>
+
+        <div class="mt-4 text-center">
+            <a href="{% url 'password_reset' %}" class="text-xs text-blue-300 hover:underline">{% trans "Помогите, я не могу войти в аккаунт" %}</a>
+        </div>
+
+        <div class="mt-6 text-center">
+            <h2 class="text-sm text-gray-300 mb-2">{% trans "Первый раз у нас?" %}</h2>
+            <a href="{% url 'store:register' %}" class="inline-block px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded">{% trans "Создать аккаунт" %}</a>
+        </div>
+
+        <div class="mt-6">
+            <div class="text-center text-sm text-gray-400 mb-2">или войти через</div>
+            <a href="{% url 'store:auth_steam_start' %}" class="w-full inline-flex items-center justify-center gap-2 py-2 bg-[#1b6b80] hover:bg-[#155a6b] text-white font-bold rounded">
+                <span>Steam</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

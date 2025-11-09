@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static store_extras i18n %}
+
+{% block content %}
+{% now 'U' as nowts %}
+<div class="space-y-4">
+  <div class="flex items-center justify-between gap-4 flex-wrap">
+    <div>
+  <h1 class="text-3xl text-white">{% trans 'Рекомендации' %}</h1>
+  <p class="text-sm text-gray-400">{% trans 'На основе вашей библиотеки и жанров' %}</p>
+    </div>
+    <div class="flex items-center gap-2 text-sm">
+  <span class="text-gray-300">{% trans 'Сортировка (A/B):' %}</span>
+      <a href="?ab=g{% for s in exclude %}&exclude={{ s }}{% endfor %}"
+         class="px-2 py-1 rounded bg-[#12333f] hover:bg-[#18566f] text-white {% if ab == 'g' %}!bg-[#1c5a6e]{% endif %}">{% trans 'Жанры↑' %}</a>
+      <a href="?ab=r{% for s in exclude %}&exclude={{ s }}{% endfor %}"
+         class="px-2 py-1 rounded bg-[#12333f] hover:bg-[#18566f] text-white {% if ab == 'r' %}!bg-[#1c5a6e]{% endif %}">{% trans 'Рейтинг↑' %}</a>
+    </div>
+  </div>
+
+  {% if top_genres %}
+  <div class="mt-3">
+  <div class="text-sm text-gray-300 mb-2">{% trans 'Исключить жанры' %}</div>
+    <div class="flex flex-wrap gap-2">
+      {% for g in top_genres %}
+        {% if g.slug in exclude %}
+          <a href="?ab={{ ab }}{% for s in exclude %}{% if s != g.slug %}&exclude={{ s }}{% endif %}{% endfor %}"
+             class="px-2 py-1 rounded text-sm bg-[#1c5a6e] text-white">
+            {{ g.name }} ✕
+          </a>
+        {% else %}
+          <a href="?ab={{ ab }}{% for s in exclude %}&exclude={{ s }}{% endfor %}&exclude={{ g.slug }}"
+             class="px-2 py-1 rounded text-sm bg-[#12333f] hover:bg-[#18566f] text-white">
+            {{ g.name }}
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    {% for game in games %}
+      <div class="bg-[#232f3e] p-3 rounded-lg">
+        {% if game.appid %}
+          <img src="/media/steam_imports/{{ game.appid }}/header.jpg?v={{ nowts }}" {% img_dims MEDIA_URL|add:'steam_imports/'|add:game.appid|add:'/header.jpg' %} alt="{{ game.title }}" class="w-full h-40 object-cover rounded" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{% if game.cover_image %}{{ game.cover_image.url }}{% else %}{% static 'store/img/placeholder.svg' %}{% endif %}'" />
+        {% elif game.cover_image %}
+          <img src="{{ game.cover_image.url }}" {% img_dims game.cover_image.url %} alt="{{ game.title }}" class="w-full h-40 object-cover rounded" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'" />
+        {% else %}
+          <img src="{% static 'store/img/placeholder.svg' %}" alt="{{ game.title }}" class="w-full h-40 object-cover rounded" />
+        {% endif %}
+        <div class="flex items-center justify-between mt-2">
+          <h2 class="text-lg text-white">{{ game.title }}</h2>
+          {% if user.is_authenticated %}
+            {% is_owned user game as owned_flag %}
+            {% if owned_flag %}
+              <span class="text-xs px-2 py-1 rounded bg-green-700/40 border border-green-600">{% trans 'В библиотеке' %}</span>
+            {% endif %}
+          {% endif %}
+        </div>
+        <p class="text-sm text-gray-400">{% if game.developer %}{{ game.developer.name }}{% endif %}</p>
+        {% if game.rating_avg %}
+        <div class="mt-1 text-sm text-gray-300 flex items-center gap-2" title="Оценка: {{ game.rating_avg|floatformat:1 }} из 5">
+          <span style="color:#f6c343">★</span>
+          <span>{{ game.rating_avg|floatformat:1 }}</span>
+          <span class="text-xs text-gray-400">({{ game.rating_count|default:0 }})</span>
+        </div>
+        {% endif %}
+        <div class="mt-2 flex justify-between items-center">
+          <span class="font-bold text-white">{% price_display game.price game.currency preferred_currency game.original_price game.discount_percent %}</span>
+          <div class="flex items-center gap-2">
+            <a href="{% url 'store:game_detail' game.slug %}" class="bg-blue-600 px-3 py-1 rounded">{% trans 'Подробнее' %}</a>
+            {% if user.is_authenticated %}
+            <form action="{% url 'store:wishlist_toggle' game.slug %}" method="post" class="inline js-wishlist-toggle">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button type="submit" class="bg-red-600 px-3 py-1 rounded text-sm" aria-label="{% trans 'Удалить из списка желаемого' %}">♥</button>
+            </form>
+            <form action="{% url 'store:recommendations_hide' game.pk %}" method="post" class="inline">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button type="submit" class="bg-[#0d3a46] hover:bg-[#114e5f] px-3 py-1 rounded text-sm">{% trans 'Скрыть' %}</button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+  <p class="text-gray-400">{% trans 'Пока нет рекомендаций — добавьте несколько игр в библиотеку.' %}</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% load static store_extras %}
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+  {% for g in games %}
+    {% with local_path="steam_imports/"|add:g.appid|add:"/header.jpg" %}
+    <a href="{% url 'store:game_detail' g.slug %}" class="block bg-[#0b2630] border border-[#072024] rounded-lg overflow-hidden hover:scale-[1.01] transition">
+      <div class="relative aspect-[16/9] bg-[#1b2838]">
+        {% if g.cover_image %}
+          <img src="{{ g.cover_image.url }}" {% img_dims g.cover_image.url %} alt="{{ g.title }}" class="w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+        {% elif local_path|file_exists %}
+          <img src="{{ MEDIA_URL }}steam_imports/{{ g.appid }}/header.jpg" {% img_dims MEDIA_URL|add:'steam_imports/'|add:g.appid|add:'/header.jpg' %} alt="{{ g.title }}" class="w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+        {% else %}
+          {% with shots=g.screenshots.all|nonheader:1 %}
+            {% if shots and shots.0 and shots.0.image %}
+              <img src="{{ shots.0.image.url }}" {% img_dims shots.0.image.url %} alt="{{ g.title }}" class="w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+            {% else %}
+              <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ g.appid }}/header.jpg" {% img_dims 'https://cdn.cloudflare.steamstatic.com/steam/apps/'|add:g.appid|add:'/header.jpg' %} alt="{{ g.title }}" class="w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+            {% endif %}
+          {% endwith %}
+        {% endif %}
+  {# Removed duplicate discount badge; price_display below renders discount/old price #}
+      </div>
+      <div class="p-3 text-white">
+        <div class="font-semibold truncate" title="{{ g.title }}">{{ g.title }}</div>
+        <div class="mt-1 text-sm text-blue-100">{% price_display g.price g.currency preferred_currency g.original_price g.discount_percent %}</div>
+      </div>
+    </a>
+    {% endwith %}
+  {% endfor %}
+</div>

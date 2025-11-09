@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load i18n %}
+<h1 class="text-2xl mb-4">{% trans 'Настройки профиля' %}</h1>
+<style>
+    /* High-contrast variant (черный текст, светлый фон) для всех полей настроек */
+    form.profile-settings-form .input,
+    form.profile-settings-form select.input,
+    form.profile-settings-form input[type="number"].input,
+    form.profile-settings-form input[type="text"].input,
+    form.profile-settings-form input[type="file"].input,
+    form.profile-settings-form select {
+        background:#ffffff !important;
+        color:#000000 !important;
+        border:1px solid #1c4a5b !important;
+        border-radius:4px !important;
+        padding:0.45rem 0.55rem !important;
+        font-size:0.875rem !important;
+        line-height:1.2;
+    }
+    form.profile-settings-form .input:focus,
+    form.profile-settings-form select:focus {
+        outline:none;
+        box-shadow:0 0 0 2px rgba(56,189,248,0.35);
+        border-color:#38bdf8;
+    }
+    form.profile-settings-form select option { color:#000; }
+    /* Checkbox label text now черный для контраста */
+    form.profile-settings-form .pref-item span { color:#000; }
+    /* Legends остаются светлыми для визуальной иерархии */
+    /* Checkbox containers */
+    .pref-item { transition: background .15s ease, border-color .15s ease; }
+    .pref-item input[type="checkbox"] { width: 16px; height:16px; accent-color:#1b6b80; }
+    .pref-item:hover { background:#1e3d47; }
+    /* Section legends */
+    fieldset legend { color:#000; }
+    /* Status text subtle */
+    .pref-status { min-width:60px; text-align:right; }
+    /* Select specific tweaks for consistent height */
+    form.profile-settings-form select.input { padding-top:0.35rem; padding-bottom:0.35rem; }
+    /* High contrast helper for small helper text */
+    .helper-text { color:#444; }
+</style>
+<form method="post" enctype="multipart/form-data" class="profile-settings-form bg-[#0b2230] p-6 rounded max-w-2xl space-y-8 border border-[#0a1e24] shadow-lg">
+        {% csrf_token %}
+
+        <fieldset class="space-y-4">
+            <legend class="text-lg font-semibold">Аккаунт</legend>
+            <div>
+                <label class="block text-sm text-gray-300 mb-1">Предпочтительный язык</label>
+                {{ form.preferred_language }}
+            </div>
+            <div>
+                <label class="block text-sm text-gray-300 mb-1">Валюта</label>
+                {{ form.preferred_currency }}
+            </div>
+            <div>
+                <label class="block text-sm text-gray-300 mb-1">Приватность профиля</label>
+                {{ form.privacy }}
+            </div>
+        </fieldset>
+
+        <fieldset class="space-y-4">
+            <legend class="text-lg font-semibold">Приватность</legend>
+            <div>
+                <label class="block text-sm font-medium text-gray-200 mb-1">Кто может комментировать профиль</label>
+                {{ form.comment_privacy }}
+                <p class="text-xs helper-text mt-1">"Только друзья" — требуется дружба. "Никто" — только вы сами.</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-200 mb-1">Кто может отправлять заявки в друзья</label>
+                {{ form.friend_request_privacy }}
+                <p class="text-xs helper-text mt-1">"Никто" — блокирует новые входящие заявки.</p>
+            </div>
+        </fieldset>
+
+        {# Appearance moved to profile_edit page #}
+
+        <fieldset class="space-y-4">
+            <legend class="text-lg font-semibold">Уведомления</legend>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <label class="pref-item flex items-center gap-2 text-sm bg-gray-700/40 px-3 py-2 rounded" data-pref="notify_profile_comment">
+                    {{ form.notify_profile_comment }}
+                    <span>Внутренние: комментарии профиля</span>
+                    <span class="pref-status text-xs text-gray-400"></span>
+                </label>
+                <label class="pref-item flex items-center gap-2 text-sm bg-gray-700/40 px-3 py-2 rounded" data-pref="notify_friend_request">
+                    {{ form.notify_friend_request }}
+                    <span>Внутренние: заявки в друзья</span>
+                    <span class="pref-status text-xs text-gray-400"></span>
+                </label>
+                <label class="pref-item flex items-center gap-2 text-sm bg-gray-700/40 px-3 py-2 rounded" data-pref="notify_friend_accept">
+                    {{ form.notify_friend_accept }}
+                    <span>Внутренние: принятие дружбы</span>
+                    <span class="pref-status text-xs text-gray-400"></span>
+                </label>
+                <label class="pref-item flex items-center gap-2 text-sm bg-gray-700/40 px-3 py-2 rounded" data-pref="email_profile_comment">
+                    {{ form.email_profile_comment }}
+                    <span>Email: комментарии профиля</span>
+                    <span class="pref-status text-xs text-gray-400"></span>
+                </label>
+                <label class="pref-item flex items-center gap-2 text-sm bg-gray-700/40 px-3 py-2 rounded" data-pref="email_friend_events">
+                    {{ form.email_friend_events }}
+                    <span>Email: события дружбы</span>
+                    <span class="pref-status text-xs text-gray-400"></span>
+                </label>
+                <label class="pref-item flex items-center gap-2 text-sm bg-gray-700/40 px-3 py-2 rounded" data-pref="notify_price_drop">
+                    {{ form.notify_price_drop }}
+                    <span>Внутренние: снижение цены</span>
+                    <span class="pref-status text-xs text-gray-400"></span>
+                </label>
+                <label class="pref-item flex items-center gap-2 text-sm bg-gray-700/40 px-3 py-2 rounded" data-pref="email_price_drop">
+                    {{ form.email_price_drop }}
+                    <span>Email: снижение цены</span>
+                    <span class="pref-status text-xs text-gray-400"></span>
+                </label>
+            </div>
+            <p class="text-xs text-gray-400">Email отправляется только если он указан в аккаунте.</p>
+        </fieldset>
+
+        <div class="pt-2">
+            <button type="submit" class="bg-blue-600 px-4 py-2 rounded text-sm font-semibold">Сохранить изменения</button>
+        </div>
+</form>
+<script>
+// AJAX toggle for notification preferences
+(function(){
+    const items = document.querySelectorAll('.pref-item input[type="checkbox"]');
+    if(!items.length) return;
+    function getCsrf(){
+        const el = document.querySelector('input[name="csrfmiddlewaretoken"]');
+        return el ? el.value : '';
+    }
+    items.forEach(cb => {
+        cb.addEventListener('change', () => {
+            const wrap = cb.closest('.pref-item');
+            const field = wrap.getAttribute('data-pref');
+            const statusEl = wrap.querySelector('.pref-status');
+            statusEl.textContent = '…';
+            fetch('/api/profile/pref-toggle/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+                body: JSON.stringify({ field: field, value: cb.checked })
+            }).then(r => r.json().then(j => ({ok:r.ok, data:j}))).then(res => {
+                if(res.ok && res.data.ok){
+                    statusEl.textContent = 'Сохранено';
+                    setTimeout(()=> statusEl.textContent = '', 1500);
+                } else {
+                    statusEl.textContent = 'Ошибка';
+                }
+            }).catch(()=>{ statusEl.textContent = 'Ошибка сети'; });
+        });
+    });
+})();
+</script>
+{% endblock %}

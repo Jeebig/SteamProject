@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static store_extras %}
+{% block content %}
+<div class="bg-gray-900 rounded-lg p-6 mb-6">
+    <div class="flex items-center gap-4 mb-4">
+        <img src="https://avatars.steamstatic.com/placeholder.jpg"
+            class="w-16 h-16 rounded-full border-2 border-blue-500" alt="avatar">
+        <div>
+            <h1 class="text-2xl font-bold">{{ user.username }}: Список желаемого</h1>
+            <div class="text-sm text-gray-400">Список желаемого: {{ games|length }}</div>
+        </div>
+    </div>
+    <div class="flex gap-2 mb-4">
+        <input type="text" placeholder="Поиск по названию или метке"
+            class="px-3 py-2 rounded bg-gray-800 text-gray-100 w-full">
+        <button class="bg-gray-700 px-4 py-2 rounded text-gray-200">Настройки</button>
+        <button class="bg-gray-700 px-4 py-2 rounded text-gray-200">Сортировать</button>
+    </div>
+    <div class="space-y-6">
+        {% for game in games %}
+        <div class="bg-gray-800 rounded-lg flex gap-4 p-4 items-center">
+            <div class="w-40 h-24 flex-shrink-0">
+                {% with local_path="steam_imports/"|add:game.appid|add:"/header.jpg" %}
+                {% if game.cover_image %}
+                <img src="{{ game.cover_image.url }}" alt="{{ game.title }}" class="w-full h-full object-cover rounded">
+                {% elif local_path|file_exists %}
+                <img src="{{ MEDIA_URL }}steam_imports/{{ game.appid }}/header.jpg" alt="{{ game.title }}"
+                    class="w-full h-full object-cover rounded">
+                {% elif game.appid %}
+                <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ game.appid }}/header.jpg"
+                    alt="{{ game.title }}" class="w-full h-full object-cover rounded">
+                {% else %}
+                <div class="bg-gray-700 w-full h-full flex items-center justify-center rounded">Нет изображения</div>
+                {% endif %}
+                {% endwith %}
+            </div>
+            <div class="flex-1">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-bold">{{ game.title }}</h2>
+                    <span class="font-bold text-lg bg-gray-900 px-3 py-1 rounded">{% if game.price|floatformat:2 ==
+                        "0.00" %}Бесплатно{% else %}{{ game.price }} {{ game.currency }}{% endif %}</span>
+                </div>
+                <div class="text-sm text-gray-400 mb-1">
+                    {% if game.developer %}{{ game.developer.name }}{% endif %}
+                    {% for genre in game.genres.all %}<span class="ml-2 px-2 py-1 bg-gray-700 rounded">{{ genre.name
+                        }}</span>{% endfor %}
+                </div>
+                <div class="text-xs text-gray-500 mb-1">Дата выхода: {{ game.release_date }}</div>
+                <div class="text-xs text-gray-500 mb-1">Дата добавления: {{ game.created_at|date:'d.m.Y' }}</div>
+                <div class="flex gap-2 mt-2">
+                    <button class="bg-green-600 px-4 py-2 rounded text-white">Добавить в корзину</button>
+                    <form action="{% url 'store:wishlist_toggle' game.slug %}" method="post" class="inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{% url 'store:wishlist' %}">
+                        <button type="submit" class="bg-gray-700 px-4 py-2 rounded text-gray-200">удалить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-gray-400">Ваш список желаемого пуст.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

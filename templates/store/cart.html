@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static store_extras i18n %}
+{% block content %}
+
+<div class="grid grid-cols-12 gap-6">
+  <!-- Main column -->
+  <div class="col-span-12 lg:col-span-8">
+    <div class="bg-gray-900 rounded-lg p-6 mb-4">
+  <h1 class="text-2xl font-bold mb-4">{% trans 'Ваша корзина' %}</h1>
+
+      {% if detailed_items %}
+        {% for row in detailed_items %}
+          {% with it=row.item g=row.game %}
+          <div class="bg-gray-800 rounded p-4 mb-3 flex items-center gap-4">
+            <div class="w-36 h-20 flex-shrink-0">
+              {% with local_path="steam_imports/"|add:g.appid|add:"/header.jpg" %}
+                {% if g.cover_image %}
+                  <img src="{{ g.cover_image.url }}" {% img_dims g.cover_image.url %} alt="{{ g.title }}" class="w-full h-full object-cover rounded">
+                {% elif local_path|file_exists %}
+                  <img src="{{ MEDIA_URL }}steam_imports/{{ g.appid }}/header.jpg" {% img_dims MEDIA_URL|add:'steam_imports/'|add:g.appid|add:'/header.jpg' %} alt="{{ g.title }}" class="w-full h-full object-cover rounded">
+                {% elif g.appid %}
+                  <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ g.appid }}/header.jpg" {% img_dims 'https://cdn.cloudflare.steamstatic.com/steam/apps/'|add:g.appid|add:'/header.jpg' %} alt="{{ g.title }}" class="w-full h-full object-cover rounded">
+                {% else %}
+                  <div class="bg-gray-700 w-full h-full flex items-center justify-center rounded">{% trans 'Нет изображения' %}</div>
+                {% endif %}
+              {% endwith %}
+            </div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <a class="text-lg font-semibold hover:underline" href="{% url 'store:game_detail' g.slug %}">{{ g.title }}</a>
+                <div class="flex items-center gap-1 opacity-80">
+                  {% if g.supports_windows %}<img src="{% static 'icons/windows.svg' %}" alt="Windows" class="w-4 h-4">{% endif %}
+                  {% if g.supports_mac %}<img src="{% static 'icons/mac.svg' %}" alt="macOS" class="w-4 h-4">{% endif %}
+                  {% if g.supports_linux %}<img src="{% static 'icons/linux.svg' %}" alt="Linux" class="w-4 h-4">{% endif %}
+                </div>
+              </div>
+              <div class="text-sm text-gray-400 mt-1">
+                {% if g.price|floatformat:2 == '0.00' %}
+                  {% trans 'Бесплатно' %}
+                {% else %}
+                  {{ g.price|floatformat:2 }} {{ g.currency }} × {{ row.qty }} =
+                  <span class="font-semibold text-gray-200">{{ row.line_total|floatformat:2 }} {{ row.currency }}</span>
+                  {% if preferred_currency and preferred_currency != row.currency %}
+                    <span class="text-gray-400 text-xs ml-2">≈ {{ row.converted_line_total|floatformat:2 }} {{ preferred_currency }}</span>
+                  {% endif %}
+                {% endif %}
+              </div>
+              <div class="mt-3 flex items-center gap-3">
+                <form action="{% url 'store:cart_update' it.id %}" method="post" class="inline-flex items-center gap-2">
+                  {% csrf_token %}
+                  <label class="text-sm text-gray-400">{% trans 'Количество' %}</label>
+                  <input type="number" min="0" name="quantity" value="{{ row.qty }}" class="w-20 px-2 py-1 rounded bg-gray-700">
+                  <button type="submit" class="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white text-sm">{% trans 'Обновить' %}</button>
+                </form>
+                <form action="{% url 'store:cart_remove' it.id %}" method="post" class="inline">
+                  {% csrf_token %}
+                  <button type="submit" class="px-3 py-1 rounded bg-red-600 hover:bg-red-700 text-white text-sm">{% trans 'Удалить' %}</button>
+                </form>
+              </div>
+            </div>
+          </div>
+          {% endwith %}
+        {% endfor %}
+
+        <div class="mt-4 flex items-center gap-3">
+          <a href="{% url 'store:game_list' %}" class="px-4 py-2 rounded bg-gray-700 hover:bg-gray-600">{% trans 'Продолжить покупки' %}</a>
+          <a href="{% url 'store:checkout' %}" class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">{% trans 'Перейти к оплате' %}</a>
+          <form action="{% url 'store:cart_clear' %}" method="post" class="inline ml-auto">
+            {% csrf_token %}
+            <button type="submit" class="text-sm text-gray-400 hover:text-gray-200 underline">{% trans 'Удалить все товары' %}</button>
+          </form>
+        </div>
+      {% else %}
+        <div class="bg-gray-900 rounded p-6">
+          <p class="text-gray-400">{% trans 'Ваша корзина пуста.' %} <a href="{% url 'store:game_list' %}" class="text-blue-400 underline">{% trans 'Перейти в каталог' %}</a></p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Recommendations -->
+    <div class="bg-gray-900 rounded-lg p-6" aria-label="recommendations">
+  <h2 class="text-xl font-semibold mb-4">{% trans 'Рекомендации для вас' %}</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for g in recommendations %}
+        <a href="{% url 'store:game_detail' g.slug %}" class="block bg-gray-800 rounded overflow-hidden hover:ring-1 hover:ring-blue-600">
+          {% with local_path="steam_imports/"|add:g.appid|add:"/header.jpg" %}
+            {% if g.cover_image %}
+              <img src="{{ g.cover_image.url }}" {% img_dims g.cover_image.url %} alt="{{ g.title }}" class="w-full h-28 object-cover">
+            {% elif local_path|file_exists %}
+              <img src="{{ MEDIA_URL }}steam_imports/{{ g.appid }}/header.jpg" {% img_dims MEDIA_URL|add:'steam_imports/'|add:g.appid|add:'/header.jpg' %} alt="{{ g.title }}" class="w-full h-28 object-cover">
+            {% elif g.appid %}
+              <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ g.appid }}/header.jpg" {% img_dims 'https://cdn.cloudflare.steamstatic.com/steam/apps/'|add:g.appid|add:'/header.jpg' %} alt="{{ g.title }}" class="w-full h-28 object-cover">
+            {% else %}
+              <div class="w-full h-28 bg-gray-700 flex items-center justify-center">{% trans 'Нет изображения' %}</div>
+            {% endif %}
+          {% endwith %}
+          <div class="p-2">
+            <div class="text-sm font-semibold truncate">{{ g.title }}</div>
+            <div class="text-xs text-gray-400 mt-1">{% price_display g.price g.currency preferred_currency g.original_price g.discount_percent %}</div>
+          </div>
+        </a>
+        {% empty %}
+          <div class="text-gray-400">{% trans 'Нет рекомендаций' %}</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary sidebar -->
+  <div class="col-span-12 lg:col-span-4">
+    <div class="bg-gray-900 rounded-lg p-6 sticky top-4">
+  <div class="text-lg font-semibold">{% trans 'Общая стоимость' %}</div>
+  <div class="mt-2 text-2xl font-bold">{% if subtotal|floatformat:2 == '0.00' %}{% trans 'Бесплатно' %}{% else %}{{ subtotal|floatformat:2 }} {{ currency }}{% endif %}</div>
+      {% if preferred_currency and preferred_currency != currency %}
+  <div class="text-gray-400">≈ {{ converted_subtotal|floatformat:2 }} {{ preferred_currency }}</div>
+      {% endif %}
+  <p class="text-xs text-gray-500 mt-3">{% trans 'Налог с продаж рассчитывается при оформлении покупки в регионах, где он применим.' %}</p>
+  <a href="{% url 'store:checkout' %}" class="mt-4 block w-full text-center px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">{% trans 'Перейти к оплате' %}</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

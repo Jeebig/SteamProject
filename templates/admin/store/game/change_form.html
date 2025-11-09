@@ -1,0 +1,14 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{# Insert an "Import again" button into the object-tools section if the object has an appid #}
+{% block object-tools %}
+{{ block.super }}
+{% if original and original.appid %}
+<ul class="object-tools">
+    <li>
+        <a class="historylink" href="{% url 'admin:store_game_import' original.pk %}">{% trans "Import again" %}</a>
+    </li>
+</ul>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load i18n store_extras %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">{% trans 'Мои друзья' %}</h1>
+<div class="mb-6 p-4 bg-gray-900 rounded border border-gray-800">
+  <h2 class="text-lg font-semibold mb-2">{% trans 'Добавить друга по ID' %}</h2>
+  <p class="text-xs text-gray-400 mb-3">{% trans 'Поделитесь своим ID, чтобы вас могли добавить. ID не меняется при смене ника.' %}</p>
+  <div class="flex items-center gap-4 mb-4 flex-wrap">
+    <div>
+      <span class="text-xs text-gray-400 block">{% trans 'Ваш ID' %}</span>
+      <code class="text-sm px-2 py-1 bg-gray-800 rounded select-all">{{ my_friend_code }}</code>
+    </div>
+    <button type="button" onclick="navigator.clipboard.writeText('{{ my_friend_code }}').then(()=>{this.innerText='{{ my_friend_code }} ✓'; setTimeout(()=>{this.innerText='Скопировать ID';},1500);});" class="text-xs px-3 py-2 rounded bg-gray-700 hover:bg-gray-600">{% trans 'Скопировать ID' %}</button>
+  </div>
+  <form action="{% url 'store:friend_add_by_code' %}" method="post" class="flex items-center gap-3 flex-wrap" id="add-friend-form">{% csrf_token %}
+    <input type="text" name="code" placeholder="{% trans 'Введите ID друга...' %}" class="bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm w-56" />
+    <button class="bg-[#1b6b80] hover:bg-[#1d5e6d] px-4 py-2 rounded text-sm">{% trans 'Добавить' %}</button>
+  </form>
+  <div id="add-friend-message" class="mt-2 text-sm"></div>
+</div>
+<form method="get" class="mb-6 flex items-center gap-3">
+  <input type="text" name="q" value="{{ friends_query }}" placeholder="{% trans 'Поиск друга...' %}" class="bg-gray-800 border border-gray-700 rounded px-3 py-2 text-sm w-64" />
+  <button class="bg-[#1b6b80] hover:bg-[#1d5e6d] px-3 py-2 rounded text-sm">{% trans 'Искать' %}</button>
+  {% if friends_query %}<a href="?" class="text-xs text-gray-400 hover:text-gray-300">{% trans 'Сброс' %}</a>{% endif %}
+</form>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+  <div>
+    <h2 class="text-xl font-semibold mb-2">{% trans 'Друзья' %}</h2>
+    <div class="space-y-2">
+      {% for u in friends %}
+        {% with p=u.profile %}
+        <div class="bg-gray-900 rounded p-3 flex items-center justify-between group">
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              {% if p.steam_avatar %}
+                <img src="{{ p.steam_avatar }}" {% img_dims p.steam_avatar %} alt="avatar" class="w-10 h-10 rounded object-cover"/>
+              {% else %}
+                <div class="w-10 h-10 rounded bg-[#1e3d47] text-gray-200 flex items-center justify-center text-sm">{{ u.username|first|upper }}</div>
+              {% endif %}
+              {% if u.is_online %}
+              <span class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-green-500 ring-2 ring-gray-900" title="Online"></span>
+              {% endif %}
+            </div>
+            <a href="{% url 'store:profile' u.username %}" class="text-sky-300 hover:text-sky-200">{{ u.username }}</a>
+          </div>
+          <form action="{% url 'store:friend_toggle' u.username %}" method="post" title="Удалить из друзей" class="ml-2">{% csrf_token %}
+            <button class="p-2 rounded bg-gray-700 hover:bg-gray-600" aria-label="Удалить">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M3 6h18"/><path d="M8 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6l1-3h4l1 3"/></svg>
+            </button>
+          </form>
+        </div>
+        {% endwith %}
+      {% empty %}
+  <div class="text-gray-400">{% trans 'Пока нет друзей.' %}</div>
+      {% endfor %}
+    </div>
+  </div>
+  <div>
+  <h2 class="text-xl font-semibold mb-2">{% trans 'Входящие заявки' %}</h2>
+    <div class="space-y-2">
+      {% for r in incoming %}
+        {% with u=r.sender p=u.profile %}
+        <div class="bg-gray-900 rounded p-3 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            {% if p.steam_avatar %}
+              <img src="{{ p.steam_avatar }}" {% img_dims p.steam_avatar %} alt="avatar" class="w-10 h-10 rounded object-cover"/>
+            {% else %}
+              <div class="w-10 h-10 rounded bg-[#1e3d47] text-gray-200 flex items-center justify-center text-sm">{{ u.username|first|upper }}</div>
+            {% endif %}
+            {% if u.is_online %}<span class="w-3 h-3 rounded-full bg-green-500" title="Online"></span>{% endif %}
+            <a href="{% url 'store:profile' u.username %}" class="text-sky-300 hover:text-sky-200">{{ u.username }}</a>
+          </div>
+          <div class="flex items-center gap-2">
+            <form action="{% url 'store:friend_request_respond' r.id %}" method="post" class="inline" title="Принять">{% csrf_token %}<input type="hidden" name="action" value="accept"><button class="p-2 rounded bg-[#1b6b80] hover:bg-[#1d5e6d]" aria-label="Принять">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M20 6L9 17l-5-5"/></svg>
+            </button></form>
+            <form action="{% url 'store:friend_request_respond' r.id %}" method="post" class="inline" title="Отклонить">{% csrf_token %}<input type="hidden" name="action" value="reject"><button class="p-2 rounded bg-gray-700 hover:bg-gray-600" aria-label="Отклонить">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+            </button></form>
+          </div>
+        </div>
+        {% endwith %}
+      {% empty %}
+  <div class="text-gray-400">{% trans 'Нет входящих заявок.' %}</div>
+      {% endfor %}
+    </div>
+  </div>
+  <div>
+  <h2 class="text-xl font-semibold mb-2">{% trans 'Исходящие заявки' %}</h2>
+    <div class="space-y-2">
+      {% for r in outgoing %}
+        {% with u=r.receiver p=u.profile %}
+        <div class="bg-gray-900 rounded p-3 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            {% if p.steam_avatar %}
+              <img src="{{ p.steam_avatar }}" {% img_dims p.steam_avatar %} alt="avatar" class="w-10 h-10 rounded object-cover"/>
+            {% else %}
+              <div class="w-10 h-10 rounded bg-[#1e3d47] text-gray-200 flex items-center justify-center text-sm">{{ u.username|first|upper }}</div>
+            {% endif %}
+            {% if u.is_online %}<span class="w-3 h-3 rounded-full bg-green-500" title="Online"></span>{% endif %}
+            <a href="{% url 'store:profile' u.username %}" class="text-sky-300 hover:text-sky-200">{{ u.username }}</a>
+          </div>
+          <form action="{% url 'store:friend_request_respond' r.id %}" method="post" title="Отменить" class="ml-2">{% csrf_token %}<input type="hidden" name="action" value="cancel"><button class="p-2 rounded bg-gray-700 hover:bg-gray-600" aria-label="Отменить">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          </button></form>
+        </div>
+        {% endwith %}
+      {% empty %}
+  <div class="text-gray-400">{% trans 'Нет исходящих заявок.' %}</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('add-friend-form');
+    const messageDiv = document.getElementById('add-friend-message');
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        messageDiv.textContent = '';
+        messageDiv.className = 'mt-2 text-sm';
+
+        const formData = new FormData(form);
+        const code = formData.get('code');
+        const csrfToken = formData.get('csrfmiddlewaretoken');
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams(formData).toString(),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                messageDiv.textContent = data.message;
+                messageDiv.classList.add('text-green-400');
+                form.reset();
+                // Optionally, reload the page or just the relevant parts after a delay
+                setTimeout(() => {
+                    // A simple reload to show the new state of friend lists
+                    window.location.reload();
+                }, 1500);
+            } else {
+                messageDiv.textContent = data.message || '{% trans "Произошла ошибка." %}';
+                messageDiv.classList.add('text-red-400');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            messageDiv.textContent = '{% trans "Сетевая ошибка. Попробуйте снова." %}';
+            messageDiv.classList.add('text-red-400');
+        });
+    });
+});
+</script>
+{% endblock %}

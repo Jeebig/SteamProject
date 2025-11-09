@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-4">Уведомления</h1>
+{% if unread %}
+  <h2 class="text-lg font-semibold mb-2">Непрочитанные</h2>
+  <div class="space-y-2 mb-6">
+    {% for n in unread %}
+      <div class="bg-gray-900 rounded p-3">
+        {% if n.kind == 'profile_comment' %}
+          Новый комментарий от {{ n.payload.author }} на профиле {{ n.payload.owner }} — <a class="text-blue-300 underline" href="{{ n.link_url }}">перейти</a>
+        {% elif n.kind == 'friend_request' %}
+          Заявка в друзья от {{ n.payload.user }} — <a class="text-blue-300 underline" href="/friends/">посмотреть</a>
+        {% elif n.kind == 'friend_accept' %}
+          {{ n.payload.user }} принял вашу заявку — <a class="text-blue-300 underline" href="{{ n.link_url }}">профиль</a>
+        {% elif n.kind == 'price_drop' %}
+          Снижение цены: {{ n.payload.game_title }} — было {{ n.payload.old_price }}, стало {{ n.payload.new_price }} (−{{ n.payload.percent }}%) — <a class="text-blue-300 underline" href="{{ n.link_url }}">перейти</a>
+        {% else %}
+          Уведомление
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+<h2 class="text-lg font-semibold mb-2">Все уведомления</h2>
+<div class="space-y-2">
+  {% for n in all %}
+    <div class="bg-gray-900 rounded p-3 text-sm">
+      {{ n.created_at|date:'d.m.Y H:i' }} — 
+      {% if n.kind == 'profile_comment' %}
+        Комментарий от {{ n.payload.author }} на профиле {{ n.payload.owner }} — <a class="text-blue-300 underline" href="{{ n.link_url }}">перейти</a>
+      {% elif n.kind == 'friend_request' %}
+        Заявка в друзья от {{ n.payload.user }} — <a class="text-blue-300 underline" href="/friends/">посмотреть</a>
+      {% elif n.kind == 'friend_accept' %}
+        Дружба с {{ n.payload.user }} — <a class="text-blue-300 underline" href="{{ n.link_url }}">профиль</a>
+      {% elif n.kind == 'price_drop' %}
+        Снижение цены: {{ n.payload.game_title }} — {{ n.payload.old_price }} → {{ n.payload.new_price }} (−{{ n.payload.percent }}%) — <a class="text-blue-300 underline" href="{{ n.link_url }}">перейти</a>
+      {% else %}
+        Уведомление
+      {% endif %}
+    </div>
+  {% empty %}
+    <div class="text-gray-400">Пока нет уведомлений.</div>
+  {% endfor %}
+</div>
+{% endblock %}

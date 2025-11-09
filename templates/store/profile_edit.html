@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+<h1 class="text-2xl font-semibold mb-6">Редактирование профиля</h1>
+<style>
+  :root{ --theme: #1b6b80; }
+  .tab-btn{ @apply px-3 py-2 text-sm rounded cursor-pointer; }
+  .tab-btn.active{ background:var(--theme); color:#fff; }
+  .tab-pane{ display:none; }
+  .tab-pane.active{ display:block; }
+  .form-grid{ @apply grid gap-4; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+  /* High-contrast fields (white bg + black text) differ from darker settings page */
+  .input, select.input, #profile-edit-form input[type="text"], #profile-edit-form input[type="number"], #profile-edit-form textarea, #profile-edit-form input[type="file"], #profile-edit-form select {
+    background:#ffffff !important;
+    color:#000000 !important;
+    border:1px solid #1c4a5b !important;
+    border-radius:4px !important;
+    padding:0.45rem 0.55rem !important;
+    font-size:0.875rem !important;
+    line-height:1.25;
+  }
+  #profile-edit-form .input:focus,
+  #profile-edit-form select:focus,
+  #profile-edit-form textarea:focus {
+    outline:none;
+    box-shadow:0 0 0 2px rgba(56,189,248,.35);
+    border-color:#38bdf8;
+  }
+  .accent-bg{ background:var(--theme); }
+  .accent-ring{ box-shadow: 0 0 0 2px var(--theme) inset, 0 0 12px var(--theme)55; }
+  /* Helper texts remain subtle */
+  #profile-edit-form p.text-[11px]{ color:#333 !important; }
+  /* Make labels before inputs readable on dark background */
+  #profile-edit-form .text-xs.text-gray-300{ color:#fff !important; }
+  #profile-edit-form label span.text-xs{ font-weight:500; color:#fff !important; }
+  #profile-edit-form label > span{ color:#fff !important; }
+  /* Bio counter styling */
+  #bio-counter{ font-weight:600; }
+</style>
+<form method="post" enctype="multipart/form-data" class="space-y-6" id="profile-edit-form">
+  {% csrf_token %}
+  <div class="flex flex-wrap gap-2 mb-4" id="tabs">
+    <button type="button" data-tab="appearance" class="tab-btn active">Внешний вид</button>
+    <button type="button" data-tab="persona" class="tab-btn">Персона</button>
+    <button type="button" data-tab="theme" class="tab-btn">Тема</button>
+    <button type="button" data-tab="preview" class="tab-btn">Превью</button>
+  </div>
+
+  <div class="tab-pane active" id="tab-appearance">
+    <div class="form-grid">
+      <label class="block">
+        <span class="text-xs text-gray-300">Аватар</span>
+        {{ form.avatar }}
+        <div class="mt-1 text-xs text-gray-400 flex items-center">{{ form.remove_avatar }} <span>Удалить текущий аватар</span></div>
+      </label>
+      <label class="block">
+        <span class="text-xs text-gray-300">Фон по AppID игры</span>
+        {{ form.bg_appid }}
+      </label>
+      <label class="block">
+        <span class="text-xs text-gray-300">Собственный фон профиля</span>
+        {{ form.profile_bg }}
+      </label>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="tab-persona">
+    <div class="space-y-4">
+      <label class="block">
+        <span class="text-xs text-gray-300">Отображаемое имя (persona)</span>
+        {{ form.steam_persona }}
+      </label>
+      <label class="block">
+        <span class="text-xs text-gray-300">Никнейм (логин)</span>
+        {% if request.user.profile.steam_id %}
+          {{ form.new_username }}
+          <p class="text-[11px] text-gray-400 mt-1">Никнейм меняется в аккаунте Steam, так как профиль привязан к Steam.</p>
+        {% else %}
+          {{ form.new_username }}
+          <p class="text-[11px] text-gray-400 mt-1">Можно менять здесь, так как профиль не привязан к Steam. Должен быть уникальным.</p>
+        {% endif %}
+        {% if form.new_username.errors %}
+          <ul class="mt-1 text-xs text-red-400" id="id_new_username_error">
+            {% for err in form.new_username.errors %}<li>{{ err }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+      </label>
+      <label class="block">
+        <span class="text-xs text-gray-300">Био / О себе</span>
+        {{ form.bio }}
+        <div class="text-[11px] text-gray-400 mt-1"><span id="bio-counter">0</span>/300</div>
+      </label>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="tab-theme">
+    <div class="space-y-4">
+      <label class="block">
+        <span class="text-xs text-gray-300">Цвет акцента</span>
+        {{ form.theme_color }}
+        <p class="text-xs text-gray-400 mt-1">Укажите HEX (#ff8800) или оставьте пустым для стандартного #1b6b80.</p>
+      </label>
+      <div class="flex flex-wrap gap-2" id="preset-colors">
+        <button type="button" data-color="#1b6b80" class="w-8 h-8 rounded border border-gray-700" style="background:#1b6b80"></button>
+        <button type="button" data-color="#2fb0cc" class="w-8 h-8 rounded border border-gray-700" style="background:#2fb0cc"></button>
+        <button type="button" data-color="#ff8800" class="w-8 h-8 rounded border border-gray-700" style="background:#ff8800"></button>
+        <button type="button" data-color="#ff3d5a" class="w-8 h-8 rounded border border-gray-700" style="background:#ff3d5a"></button>
+        <button type="button" data-color="#7c3aed" class="w-8 h-8 rounded border border-gray-700" style="background:#7c3aed"></button>
+        <button type="button" data-color="#059669" class="w-8 h-8 rounded border border-gray-700" style="background:#059669"></button>
+        <button type="button" data-color="#dc2626" class="w-8 h-8 rounded border border-gray-700" style="background:#dc2626"></button>
+        <button type="button" data-color="#f59e0b" class="w-8 h-8 rounded border border-gray-700" style="background:#f59e0b"></button>
+        <button type="button" data-color="#6366f1" class="w-8 h-8 rounded border border-gray-700" style="background:#6366f1"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pane" id="tab-preview">
+    <div class="rounded-lg overflow-hidden border border-[#0a1e24]">
+      <div id="live-preview" class="p-6 relative" style="background:linear-gradient(180deg,#0f2b36 0%,rgba(15,43,54,0.4) 100%);">
+        <div class="flex items-start gap-4">
+          <div id="preview-avatar" class="w-20 h-20 rounded-full bg-[#0b2630] flex items-center justify-center text-2xl font-bold accent-ring">A</div>
+          <div class="flex-1">
+            <div class="text-xl font-semibold" id="preview-name">Persona</div>
+            <div class="text-sm text-gray-300 mt-1" id="preview-bio">Био будет здесь…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="text-xs text-gray-400 mt-2">Превью упрощено и может отличаться от реального профиля.</p>
+  </div>
+
+
+  {% if form.non_field_errors %}
+    <div class="text-red-400 text-sm">{{ form.non_field_errors }}</div>
+  {% endif %}
+  <div class="pt-2 flex items-center gap-4">
+    <button class="accent-bg hover:opacity-90 transition px-5 py-2 rounded text-sm font-semibold shadow">Сохранить изменения</button>
+    <a href="{% url 'store:profile' request.user.username %}" class="text-sm text-gray-300 hover:underline">Отмена</a>
+  </div>
+</form>
+<script>
+(() => {
+  const tabs = document.querySelectorAll('#tabs [data-tab]');
+  const panes = {
+    appearance: document.getElementById('tab-appearance'),
+    persona: document.getElementById('tab-persona'),
+    theme: document.getElementById('tab-theme'),
+    preview: document.getElementById('tab-preview')
+  };
+  // Live preview updates
+  const personaInput = document.querySelector('input[name="steam_persona"]');
+  const bioInput = document.querySelector('textarea[name="bio"]');
+  const themeInput = document.querySelector('input[name="theme_color"]');
+  const previewName = document.getElementById('preview-name');
+  const previewBio = document.getElementById('preview-bio');
+  const previewAvatar = document.getElementById('preview-avatar');
+  const previewWrap = document.getElementById('live-preview');
+  const bgAppidInput = document.querySelector('input[name="bg_appid"]');
+  const profileBgInput = document.querySelector('input[name="profile_bg"]');
+  const bioCounter = document.getElementById('bio-counter');
+  let profileBgObjectUrl = null;
+  function applyPersona(){ previewName.textContent = personaInput.value.trim() || 'Persona'; }
+  function applyBio(){
+    const val = bioInput.value || '';
+    previewBio.textContent = val.trim() || 'Био будет здесь…';
+    if (bioCounter){ bioCounter.textContent = String((val||'').length); }
+  }
+  function applyTheme(){
+    const c = (themeInput.value || '#1b6b80').trim();
+    document.documentElement.style.setProperty('--theme', c);
+    previewAvatar.style.background = '#0b2630';
+  }
+  function applyBg(){
+    if (!previewWrap) return;
+    const baseGrad = 'linear-gradient(180deg,#0f2b36 0%,rgba(15,43,54,0.4) 100%)';
+    // If a custom image file selected, use it with object URL
+    if (profileBgInput && profileBgInput.files && profileBgInput.files[0]){
+      if (profileBgObjectUrl) { try { URL.revokeObjectURL(profileBgObjectUrl); } catch(_){} }
+      profileBgObjectUrl = URL.createObjectURL(profileBgInput.files[0]);
+      previewWrap.style.backgroundImage = `${baseGrad}, url('${profileBgObjectUrl}')`;
+      previewWrap.style.backgroundSize = 'cover';
+      previewWrap.style.backgroundPosition = 'center top';
+      return;
+    }
+    // Else, fallback to bg_appid (Steam header)
+    const val = (bgAppidInput && bgAppidInput.value || '').trim();
+    if (val){
+      const url = `https://cdn.cloudflare.steamstatic.com/steam/apps/${val}/header.jpg`;
+      previewWrap.style.backgroundImage = `${baseGrad}, url('${url}')`;
+      previewWrap.style.backgroundSize = 'cover';
+      previewWrap.style.backgroundPosition = 'center top';
+    } else {
+      // No background selected
+      previewWrap.style.backgroundImage = baseGrad;
+    }
+  }
+  personaInput && personaInput.addEventListener('input', applyPersona);
+  bioInput && bioInput.addEventListener('input', applyBio);
+  themeInput && themeInput.addEventListener('input', applyTheme);
+  bgAppidInput && bgAppidInput.addEventListener('input', applyBg);
+  profileBgInput && profileBgInput.addEventListener('change', applyBg);
+  applyPersona(); applyBio(); applyTheme();
+  applyBg();
+  // Preset color buttons
+  document.querySelectorAll('#preset-colors [data-color]').forEach(btn => {
+    btn.addEventListener('click', () => { themeInput.value = btn.dataset.color; applyTheme(); });
+  });
+  // Avatar instant preview
+  const avatarInput = document.querySelector('input[name="avatar"]');
+  if(avatarInput){
+    avatarInput.addEventListener('change', () => {
+      const f = avatarInput.files && avatarInput.files[0];
+      if(!f) return;
+      const reader = new FileReader();
+      reader.onload = e => { previewAvatar.textContent=''; previewAvatar.style.backgroundImage=`url(${e.target.result})`; previewAvatar.style.backgroundSize='cover'; }; reader.readAsDataURL(f);
+    });
+  }
+  // "Remove avatar" checkbox instant effect
+  const removeAvatar = document.querySelector('input[name="remove_avatar"]');
+  if (removeAvatar){
+    removeAvatar.addEventListener('change', ()=>{
+      if (removeAvatar.checked){
+        previewAvatar.style.backgroundImage='';
+        previewAvatar.textContent = (personaInput && personaInput.value ? personaInput.value[0] : 'A').toUpperCase();
+      }
+    });
+  }
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      tabs.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      Object.values(panes).forEach(p => p.classList.remove('active'));
+      panes[btn.dataset.tab].classList.add('active');
+    });
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% load static store_extras i18n %}
+{% block content %}
+{% if is_private %}
+<div class="bg-gray-900 rounded-lg p-8 text-center text-gray-300">
+  <h1 class="text-2xl font-semibold mb-2">{% trans 'Профиль закрыт' %}</h1>
+  <p>{% trans 'Владелец ограничил доступ к этому профилю.' %}</p>
+</div>
+{% else %}
+<style>
+  /* Steam-ish tokens without copying original assets */
+  .prof-banner{background:linear-gradient(180deg,#0f2b36 0%,rgba(15,43,54,0.2) 100%), radial-gradient(1200px 400px at 20% -20%, rgba(32,116,140,.35), transparent 60%);}
+  .level-badge{background:linear-gradient(180deg,#1f6f86,#155a6b); box-shadow:0 4px 18px rgba(0,0,0,.4) inset,0 6px 18px rgba(0,0,0,.35);} 
+  .level-circle{background:linear-gradient(180deg,#2fb0cc,#1890a8); box-shadow: inset 0 2px 8px rgba(255,255,255,.12), inset 0 -4px 10px rgba(0,0,0,.4);} 
+  .green-strip{background: linear-gradient(180deg,#517b3a,#3b5c2a);} 
+</style>
+<div class="prof-banner rounded-lg mb-6 relative overflow-hidden" style="{% if banner_url %}background-image: linear-gradient(180deg, rgba(7,23,34,.78), rgba(7,23,34,.25)), url('{{ banner_url }}'); background-size: cover; background-position: center top;{% endif %}">
+  <!-- Banner inner layout: fixed height similar to Steam, content vertically centered -->
+  <div class="px-6 py-5 md:py-6 lg:py-7">
+  <div class="flex items-start gap-4">
+    {% if profile.avatar %}
+      <img src="{{ profile.avatar.url }}" {% img_dims profile.avatar.url %} alt="avatar" class="w-20 h-20 rounded-full ring-2 ring-[#1b6b80] object-cover" style="border-color:{{ profile.theme_color|default:'#1b6b80' }}"/>
+    {% elif profile.steam_avatar %}
+      <img src="{{ profile.steam_avatar }}" {% img_dims profile.steam_avatar %} alt="avatar" class="w-20 h-20 rounded-full ring-2 ring-[#1b6b80] object-cover" style="border-color:{{ profile.theme_color|default:'#1b6b80' }}"/>
+    {% else %}
+      <div class="w-20 h-20 rounded-full bg-[#0b2630] flex items-center justify-center text-2xl font-bold ring-2 ring-[#1b6b80]" style="border-color:{{ profile.theme_color|default:'#1b6b80' }}">
+        {% with n=profile_user.username|first %}{{ n|upper }}{% endwith %}
+      </div>
+    {% endif %}
+    <div class="flex-1">
+      <div class="flex items-center gap-3">
+  <h1 class="text-2xl font-semibold flex items-center gap-2">
+    <span>{{ profile.steam_persona|default:profile_user.username }}</span>
+    {% if is_own_profile %}
+  <a href="{% url 'store:settings_default' %}" class="text-xs px-2 py-1 rounded bg-[#0f2b36] hover:bg-[#124351] border border-[#0a1e24]">{% trans 'Настройки' %}</a>
+    {% endif %}
+  </h1>
+          {% if user.is_authenticated and not is_own_profile %}
+            {% if is_friend %}
+              <form action="{% url 'store:friend_toggle' profile_user.username %}" method="post" class="inline">{% csrf_token %}<button class="text-sm px-2 py-1 rounded bg-gray-700">{% trans 'Убрать из друзей' %}</button></form>
+            {% elif pending_out %}
+              <form action="{% url 'store:friend_request_respond' pending_out.id %}" method="post" class="inline">{% csrf_token %}<input type="hidden" name="action" value="cancel"><button class="text-sm px-2 py-1 rounded bg-gray-700">{% trans 'Отменить заявку' %}</button></form>
+            {% elif pending_in %}
+              <form action="{% url 'store:friend_request_respond' pending_in.id %}" method="post" class="inline">{% csrf_token %}<input type="hidden" name="action" value="accept"><button class="text-sm px-2 py-1 rounded bg-[#1b6b80]">{% trans 'Принять' %}</button></form>
+              <form action="{% url 'store:friend_request_respond' pending_in.id %}" method="post" class="inline">{% csrf_token %}<input type="hidden" name="action" value="reject"><button class="text-sm px-2 py-1 rounded bg-gray-700">{% trans 'Отклонить' %}</button></form>
+            {% else %}
+              <form action="{% url 'store:friend_toggle' profile_user.username %}" method="post" class="inline">{% csrf_token %}<button class="text-sm px-2 py-1 rounded bg-[#1b6b80]">{% trans 'Добавить в друзья' %}</button></form>
+            {% endif %}
+          {% endif %}
+        {# Removed stray unmatched endif that broke template structure #}
+        <div class="level-badge flex items-center gap-2 px-2 py-1 rounded-full text-sm">
+          <div class="level-circle w-6 h-6 rounded-full flex items-center justify-center font-bold text-white">{{ level }}</div>
+          <span class="text-blue-50/90">{% trans 'Уровень' %}</span>
+        </div>
+      </div>
+      <div class="text-sm text-blue-100 mt-1">
+  {% blocktrans with join_date=profile_user.date_joined|date:'d.m.Y' spent=profile.total_spent|floatformat:2 cur=profile.preferred_currency wl=wishlist_count %}На платформе с {{ join_date }} · Всего потрачено: {{ spent }} {{ cur }} · Вишлист: {{ wl }}{% endblocktrans %} · {% n_games library_count %} · {% n_reviews reviews_count %}
+      </div>
+  {% if profile.bio %}
+  <div class="mt-3 text-sm text-gray-200 max-w-2xl border-l-4 pl-3 prose prose-invert" style="border-color:{{ profile.theme_color|default:'#1b6b80' }}">{{ profile.bio|markdown_sanitize }}</div>
+  {% endif %}
+    </div>
+  </div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Left/Main column -->
+  <div class="lg:col-span-2 space-y-6">
+    <div class="rounded-lg overflow-hidden border border-[#0a1e24]">
+  <div class="green-strip text-white px-4 py-2 font-semibold">{% trans 'Недавняя активность' %}</div>
+      <div class="bg-gray-900 p-4">
+        {% if recent_activity %}
+          <div class="text-sm text-gray-300 mb-3">{{ recent_hours_2weeks|default:0|floatformat:1 }} ч. за последние 2 недели</div>
+          <div class="space-y-3">
+            {% for a in recent_activity %}
+            <div class="bg-[#0b2230] rounded flex items-center gap-3 p-3">
+              <div class="w-[160px] h-[72px] flex-shrink-0">
+                {% if a.game %}
+                  {% with g=a.game %}
+                  {% with local_path='steam_imports/'|add:g.appid|add:'/header.jpg' %}
+                    {% if g.cover_image %}
+                      <img src="{{ g.cover_image.url }}" {% img_dims g.cover_image.url %} alt="{{ g.title }}" class="w-full h-full object-cover rounded">
+                    {% elif local_path|file_exists %}
+                      <img src="{{ MEDIA_URL }}steam_imports/{{ g.appid }}/header.jpg" {% img_dims MEDIA_URL|add:'steam_imports/'|add:g.appid|add:'/header.jpg' %} alt="{{ g.title }}" class="w-full h-full object-cover rounded">
+                    {% elif g.appid %}
+                      <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ g.appid }}/header.jpg" {% img_dims 'https://cdn.cloudflare.steamstatic.com/steam/apps/'|add:g.appid|add:'/header.jpg' %} alt="{{ g.title }}" class="w-full h-full object-cover rounded">
+                    {% else %}
+                      <div class="bg-gray-800 w-full h-full flex items-center justify-center rounded">{% trans 'Нет изображения' %}</div>
+                    {% endif %}
+                  {% endwith %}
+                  {% endwith %}
+                {% elif a.steam_appid %}
+                  <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ a.steam_appid }}/header.jpg" {% img_dims 'https://cdn.cloudflare.steamstatic.com/steam/apps/'|add:a.steam_appid|add:'/header.jpg' %} alt="{{ a.steam_title|default:'Steam game' }}" class="w-full h-full object-cover rounded">
+                {% else %}
+                  <div class="bg-gray-800 w-full h-full flex items-center justify-center rounded">{% trans 'Нет изображения' %}</div>
+                {% endif %}
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2">
+                  {% if a.game %}
+                    <a href="{% url 'store:game_detail' a.game.slug %}" class="font-semibold hover:underline truncate">{{ a.game.title }}</a>
+                  {% elif a.steam_appid %}
+                    <a href="https://store.steampowered.com/app/{{ a.steam_appid }}/" target="_blank" rel="noopener" class="font-semibold hover:underline truncate">{{ a.steam_title|default:_('Игра Steam') }}</a>
+                  {% else %}
+                    <span class="font-semibold truncate">{% trans 'Игра' %}</span>
+                  {% endif %}
+                  {% if a.last_dt %}<span class="text-xs text-gray-400">{% blocktrans with last=a.last_dt|date:'d M' %}последний запуск {{ last }}{% endblocktrans %}</span>{% endif %}
+                </div>
+                <div class="text-xs text-blue-100 mt-1">{% blocktrans with hours=a.hours_2weeks|floatformat:1 %}{{ hours }} ч. всего за 2 недели{% endblocktrans %}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-gray-400">{% trans 'Недавняя активность отсутствует.' %}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if recent_purchases %}
+    <div>
+  <h2 class="text-xl font-semibold mb-3">{% trans 'Недавние покупки' %}</h2>
+      {% include 'store/_card_grid.html' with games=recent_purchases %}
+    </div>
+    {% endif %}
+
+    {% if badges %}
+    <div>
+  <h2 class="text-xl font-semibold mb-3">{% trans 'Бейджи' %}</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {% for b in badges %}
+        <div class="bg-gray-900 rounded-lg p-3 flex items-center gap-3 border border-[#0a1e24]">
+          <div class="relative">
+            <img src="{% static b.icon %}" alt="" class="w-14 h-14 rounded-full">
+            {% if b.tier %}
+            <span class="absolute -bottom-2 -right-2 text-xs bg-[#1b6b80] text-white rounded-full px-1.5 py-0.5">T{{ b.tier }}</span>
+            {% endif %}
+          </div>
+          <div class="min-w-0">
+            <div class="font-semibold truncate">{{ b.title }}</div>
+            <div class="text-sm text-blue-100 truncate">{{ b.desc }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+  <p class="text-xs text-gray-400 mt-2">{% trans 'Бейджи и уровни — декоративные.' %} <a class="text-blue-300 underline" href="{% url 'store:profile_badges' profile_user.username %}">{% trans 'Посмотреть все бейджи' %}</a></p>
+     </div>
+    {% endif %}
+
+    {% if wishlist_preview %}
+    <div>
+      <div class="flex items-center justify-between mb-3">
+  <h2 class="text-xl font-semibold">{% trans 'Список желаемого' %}</h2>
+        {% if is_own_profile %}
+  <a class="text-sm text-blue-300 hover:underline" href="{% url 'store:wishlist' %}">{% trans 'Открыть весь список' %}</a>
+        {% endif %}
+      </div>
+      {% include 'store/_card_grid.html' with games=wishlist_preview %}
+    </div>
+    {% endif %}
+
+    <div>
+  <h2 class="text-xl font-semibold mb-3">{% trans 'Последние отзывы' %}</h2>
+      {% if recent_reviews %}
+      <div class="space-y-4">
+        {% for r in recent_reviews %}
+        <div class="bg-gray-900 rounded p-4">
+          <div class="flex items-start gap-3">
+            <div class="w-24 h-14 flex-shrink-0">
+              {% with g=r.game %}
+              {% with local_path='steam_imports/'|add:g.appid|add:'/header.jpg' %}
+                {% if g.cover_image %}
+                  <img src="{{ g.cover_image.url }}" {% img_dims g.cover_image.url %} alt="{{ g.title }}" class="w-full h-full object-cover rounded">
+                {% elif local_path|file_exists %}
+                  <img src="{{ MEDIA_URL }}steam_imports/{{ g.appid }}/header.jpg" {% img_dims MEDIA_URL|add:'steam_imports/'|add:g.appid|add:'/header.jpg' %} alt="{{ g.title }}" class="w-full h-full object-cover rounded">
+                {% elif g.appid %}
+                  <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ g.appid }}/header.jpg" {% img_dims 'https://cdn.cloudflare.steamstatic.com/steam/apps/'|add:g.appid|add:'/header.jpg' %} alt="{{ g.title }}" class="w-full h-full object-cover rounded">
+                {% else %}
+                  <div class="bg-gray-800 w-full h-full flex items-center justify-center rounded">{% trans 'Нет изображения' %}</div>
+                {% endif %}
+              {% endwith %}
+              {% endwith %}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <a href="{% url 'store:game_detail' r.game.slug %}" class="font-semibold hover:underline truncate">{{ r.game.title }}</a>
+                <span class="text-xs text-gray-400">{{ r.created_at|date:'d.m.Y' }}</span>
+              </div>
+              <div class="text-sm text-blue-100 mt-1">{% blocktrans with rating=r.rating|floatformat:1 %}Оценка: {{ rating }} / 5{% endblocktrans %}</div>
+              {% if r.text %}
+              <div class="mt-2 text-sm text-gray-200 whitespace-pre-line">{{ r.text }}</div>
+              {% endif %}
+              <div class="text-xs text-gray-400 mt-2">{% blocktrans with yes=r.helpful_yes|default:0 no=r.helpful_no|default:0 %}Полезно: +{{ yes }} / -{{ no }}{% endblocktrans %}</div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+  <div class="text-gray-400">{% trans 'Пока нет отзывов.' %}</div>
+      {% endif %}
+    </div>
+
+    <!-- Comments -->
+    <div class="rounded-lg overflow-hidden border border-[#0a1e24]">
+      <div class="green-strip text-white px-4 py-2 font-semibold flex items-center justify-between">
+  <span>{% trans 'Комментарии' %}</span>
+        {% if user.is_authenticated and not is_own_profile %}
+        <form action="{% url 'store:profile_comment_sub_toggle' profile_user.username %}" method="post">
+          {% csrf_token %}
+          <label class="text-sm flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" onclick="this.form.submit()" {% if is_subscribed %}checked{% endif %}>
+            <span>{% trans 'Подписаться' %}</span>
+          </label>
+        </form>
+        {% endif %}
+      </div>
+      <div class="bg-gray-900 p-4 space-y-4">
+        {% if user.is_authenticated %}
+        <form action="{% url 'store:profile_comment' profile_user.username %}" method="post" class="flex items-start gap-3">
+          {% csrf_token %}
+          {% if user.profile.steam_avatar %}
+            <img src="{{ user.profile.steam_avatar }}" {% img_dims user.profile.steam_avatar %} class="w-10 h-10 rounded-full object-cover" alt="">
+          {% else %}
+            <div class="w-10 h-10 rounded-full bg-[#0b2630]"></div>
+          {% endif %}
+          <input name="text" class="flex-1 bg-[#0b2230] rounded px-3 py-2 text-sm placeholder-gray-400" placeholder="{% trans 'Оставить комментарий' %}" maxlength="1000">
+          <button class="px-3 py-2 bg-[#1b6b80] rounded text-sm">{% trans 'Отправить' %}</button>
+        </form>
+        {% else %}
+  <div class="text-sm text-gray-300">{% trans 'Чтобы оставить комментарий,' %} <a class="text-blue-300 underline" href="{% url 'login' %}?next={{ request.path }}">{% trans 'войдите' %}</a>.</div>
+        {% endif %}
+
+        {% if comments %}
+          <div class="divide-y divide-[#0a1e24]">
+            {% for c in comments %}
+            <div class="py-3 flex items-start gap-3">
+              {% if c.author.profile.steam_avatar %}
+                <img src="{{ c.author.profile.steam_avatar }}" {% img_dims c.author.profile.steam_avatar %} class="w-10 h-10 rounded-full object-cover" alt="">
+              {% else %}
+                <div class="w-10 h-10 rounded-full bg-[#0b2630]"></div>
+              {% endif %}
+              <div class="min-w-0">
+                <div class="text-sm flex items-center justify-between gap-3">
+                  <div><span class="font-semibold">{{ c.author.username }}</span> <span class="text-gray-400 text-xs">{{ c.created_at|date:'d.m.Y H:i' }}</span></div>
+                  {% if user.is_authenticated and user.id == c.author_id or user.is_authenticated and user.id == c.profile_owner_id %}
+                  <form action="{% url 'store:profile_comment_delete' c.id %}" method="post" class="inline">
+                    {% csrf_token %}
+                    <button class="text-xs text-gray-300 hover:text-white">{% trans 'Удалить' %}</button>
+                  </form>
+                  {% endif %}
+                  {% if user.is_authenticated and user.id == c.profile_owner_id and user.id != c.author_id %}
+                    <form action="{% url 'store:profile_comment_ban_toggle' profile_user.username c.author_id %}" method="post" class="inline">{% csrf_token %}<button class="text-xs text-gray-300 hover:text-white">{% trans 'Бан/Разбан' %}</button></form>
+                  {% endif %}
+                </div>
+                <div class="text-sm text-gray-200 whitespace-pre-line">{{ c.text }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-gray-400">{% trans 'Пока нет комментариев.' %}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Right/Sidebar -->
+  <aside class="space-y-6">
+    <div class="bg-gray-900 rounded-lg p-4 border border-[#0a1e24]">
+      <div class="text-sm text-gray-300">{{ online_status }}</div>
+    {% if is_own_profile %}
+  <a href="{% url 'store:profile_edit' %}" class="mt-3 inline-block px-3 py-1 rounded text-sm" style="background:{{ profile.theme_color|default:'#1b6b80' }}">{% trans 'Редактировать профиль' %}</a>
+    {% endif %}
+    </div>
+    <div class="bg-gray-900 rounded-lg p-4 border border-[#0a1e24] text-sm divide-y divide-[#0a1e24]">
+  <div class="flex items-center justify-between py-2"><span>{% trans 'Значки' %}</span><span class="text-blue-100">{{ badges_count }}</span></div>
+  <div class="flex items-center justify-between py-2"><span>{% trans 'Игры' %}</span><span class="text-blue-100">{{ library_count }}</span></div>
+  <div class="flex items-center justify-between py-2"><span>{% trans 'Желаемое' %}</span><span class="text-blue-100">{{ wishlist_count }}</span></div>
+  <div class="flex items-center justify-between py-2"><span>{% trans 'Обзоры' %}</span><span class="text-blue-100">{{ reviews_count }}</span></div>
+  <div class="pt-2"><a href="{% url 'store:profile_badges' profile_user.username %}" class="text-blue-300 hover:underline">{% trans 'Все значки →' %}</a></div>
+    </div>
+  </aside>
+</div>
+{% endif %}
+{% endblock %}

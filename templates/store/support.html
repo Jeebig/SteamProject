@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <section class="lg:col-span-2 bg-gray-900 rounded-lg p-6">
+    <h1 class="text-2xl font-bold mb-4">Поддержка</h1>
+    {% if success %}
+      <div class="p-4 bg-green-800/40 border border-green-700 rounded mb-4">Ваше обращение отправлено. Мы свяжемся с вами по email.</div>
+    {% endif %}
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <div class="text-sm text-gray-300">
+        Ваша учётная запись: <span class="font-semibold">{{ request.user.username }}</span>{% if request.user.email %} • {{ request.user.email }}{% endif %}
+      </div>
+      <div>
+        <label class="block text-sm mb-1">Тема обращения</label>
+        {{ form.category }}
+        {% if form.category.errors %}<div class="text-red-400 text-sm">{{ form.category.errors|join:', ' }}</div>{% endif %}
+      </div>
+      <div>
+        <label class="block text-sm mb-1">Другое (уточните тему)</label>
+        {{ form.category_other }}
+        {% if form.category_other.errors %}<div class="text-red-400 text-sm">{{ form.category_other.errors|join:', ' }}</div>{% endif %}
+      </div>
+      <div>
+        <label class="block text-sm mb-1">Заголовок</label>
+        {{ form.subject }}
+        {% if form.subject.errors %}<div class="text-red-400 text-sm">{{ form.subject.errors|join:', ' }}</div>{% endif %}
+      </div>
+      <div>
+        <label class="block text-sm mb-1">Сообщение</label>
+        {{ form.message }}
+        {% if form.message.errors %}<div class="text-red-400 text-sm">{{ form.message.errors|join:', ' }}</div>{% endif %}
+      </div>
+      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Отправить</button>
+    </form>
+  </section>
+  <aside class="bg-gray-900 rounded-lg p-6">
+    <h2 class="text-xl font-semibold mb-3">Частые вопросы</h2>
+    <ul class="space-y-3">
+      {% for item in faqs %}
+        <li>
+          <div class="font-medium">{{ item.q }}</div>
+          <div class="text-sm text-gray-300">{{ item.a }}</div>
+        </li>
+      {% empty %}
+        <li class="text-gray-400">Пока нет вопросов.</li>
+      {% endfor %}
+    </ul>
+  </aside>
+</div>
+{% endblock %}

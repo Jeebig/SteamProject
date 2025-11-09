@@ -1,0 +1,500 @@
+{% extends 'base.html' %}
+{% load static store_extras steam_tags i18n %}
+
+{% block content %}
+<div class="bg-[#16202d] min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 py-6">
+
+        <!-- Banner / Hero -->
+        <div class="relative rounded-lg overflow-hidden mb-8 shadow-lg">
+            {% if featured and featured.0 %}
+            {% with featured_game=featured.0 %}
+            {% if featured_game.cover_image %}
+            <img src="{{ featured_game.cover_image.url }}" alt="{{ featured_game.title }}"
+                class="w-full h-72 object-cover opacity-80" fetchpriority="high" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+            {% elif featured_game.appid %}
+            {% with local_path="steam_imports/"|add:featured_game.appid|add:"/header.jpg" %}
+            {% if local_path|file_exists %}
+            <img src="{{ MEDIA_URL }}steam_imports/{{ featured_game.appid }}/header.jpg" alt="{{ featured_game.title }}"
+                class="w-full h-72 object-cover opacity-80" fetchpriority="high">
+            {% else %}
+            <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ featured_game.appid }}/header.jpg"
+                alt="{{ featured_game.title }}" class="w-full h-72 object-cover opacity-80" fetchpriority="high">
+            {% endif %}
+            {% endwith %}
+            {% else %}
+            <div class="w-full h-72 bg-gray-800 flex items-center justify-center text-gray-400 text-xl">{% trans 'Нет превью' %}</div>
+            {% endif %}
+            <div class="absolute inset-0 bg-gradient-to-t from-[#16202d] via-transparent to-transparent"></div>
+            <div class="absolute left-8 bottom-8 text-white">
+                <h1 class="text-4xl font-bold drop-shadow">{{ featured_game.title }}</h1>
+                <p class="mt-2 max-w-xl text-lg">{{ featured_game.short_description|default:featured_game.description|truncatechars:200 }}</p>
+                <a href="{% url 'store:game_detail' featured_game.slug %}"
+                    class="inline-block mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow">Подробнее</a>
+            </div>
+            {% endwith %}
+            {% else %}
+            <div class="w-full h-72 bg-gray-800 flex items-center justify-center text-gray-400 text-xl">Нет игр для
+                показа</div>
+            {% endif %}
+        </div>
+
+        <!-- Популярное и рекомендуемое (карточка слева + панель справа) -->
+    <h2 class="text-2xl font-semibold mb-4 text-white">{% trans 'Популярное и рекомендуемое' %}</h2>
+        <div class="relative mb-10">
+            <div
+                class="relative promo-outer bg-[#0b2630] border border-[#072024] rounded-lg overflow-hidden p-3 pb-12 shadow-2xl ring-1 ring-black/20">
+                {# Request at least 4 paid promos, falling back to `catalog` if `promos` is too small #}
+                {% paid_games promos 4 catalog as paid_promos %}
+                {% if paid_promos %}
+                <div class="w-full relative md:h-[315px] h-[220px] overflow-hidden">
+                    {% for g in paid_promos %}
+                    {% with local_path="steam_imports/"|add:g.appid|add:"/header.jpg" %}
+                    <div class="promo-slide absolute inset-0 transition-opacity duration-700 ease-in-out {% if forloop.first %}opacity-100 pointer-events-auto relative{% else %}opacity-0 pointer-events-none{% endif %}" data-slide="{{ forloop.counter0 }}">
+                        <div class="h-full flex flex-col md:flex-row gap-6 items-stretch">
+                            <!-- Большое превью слева -->
+                            <div class="promo-left md:w-[680px] w-full bg-[#1b2838] rounded-lg overflow-hidden h-full relative promo-big-shadow">
+                                <a href="{% url 'store:game_detail' g.slug %}" class="absolute inset-0 z-10" aria-label="Перейти к странице игры {{ g.title }}"><span class="sr-only">Перейти</span></a>
+                                {% if g.appid %}
+                                    {% with local_path="steam_imports/"|add:g.appid|add:"/header.jpg" %}
+                                        {% if local_path|file_exists %}
+                                            <img src="{{ MEDIA_URL }}steam_imports/{{ g.appid }}/header.jpg" data-src="{{ MEDIA_URL }}steam_imports/{{ g.appid }}/header.jpg" alt="{{ g.title }}" class="promo-cover-image" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                                        {% else %}
+                                            {% if g.cover_image %}
+                                                <img src="{{ g.cover_image.url }}" data-src="{{ g.cover_image.url }}" alt="{{ g.title }}" class="promo-cover-image" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                                            {% else %}
+                                            {% if g.appid == 730 %}
+                                                <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/271590/header.jpg" data-src="https://cdn.cloudflare.steamstatic.com/steam/apps/271590/header.jpg" alt="Grand Theft Auto V" class="promo-cover-image" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                                            {% elif g.appid == 570 %}
+                                                <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/292030/header.jpg" data-src="https://cdn.cloudflare.steamstatic.com/steam/apps/292030/header.jpg" alt="The Witcher 3: Wild Hunt" class="promo-cover-image" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                                            {% else %}
+                                                <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ g.appid }}/header.jpg" data-src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ g.appid }}/header.jpg" alt="{{ g.title }}" class="promo-cover-image" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                                            {% endif %}
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endwith %}
+                                {% else %}
+                                    <div class="w-full h-full bg-gray-800 flex items-center justify-center text-gray-400">{% trans 'Нет превью' %}</div>
+                                {% endif %}
+                                <div class="absolute left-0 bottom-0 w-full md:w-[560px] h-32 bg-gradient-to-t from-black/90 via-black/10 to-transparent opacity-80 pointer-events-none"></div>
+                                {% if g.discount %}
+                                <div class="absolute left-3 top-3 bg-red-600 text-white text-xs px-2 py-1 rounded font-bold z-40 shadow-lg">-{{ g.discount }}%</div>
+                                {% endif %}
+                                <!-- menu icon -->
+                                <button class="absolute right-3 top-3 bg-black bg-opacity-40 text-white rounded px-2 py-1 text-sm z-40">…</button>
+                            </div>
+                            <!-- Правая панель: название, мини-скриншоты, описание, цена -->
+                            <div class="md:w-[420px] w-full bg-[#0d2730] p-4 rounded-lg text-white flex flex-col h-full shadow-inner md:ml-0 mt-4 md:mt-0 promo-right-panel justify-between">
+                                <h3 class="text-2xl font-bold mb-2 leading-tight">{{ g.title }}</h3>
+
+                                {% if g.appid %}
+                                    {% local_screenshots g.appid 2 as local_shots %}
+                                {% else %}
+                                    {% with local_shots=None %}{% endwith %}
+                                {% endif %}
+
+                                <div class="flex flex-row gap-3 mb-3 items-center promo-thumbs w-full justify-end">
+                                    {% if local_shots %}
+                                        {% for url in local_shots %}
+                                            <div class="promo-thumb-wrap relative">
+                                                <a href="{% url 'store:game_detail' g.slug %}" class="promo-thumb-link inline-block z-10">
+                                                    <img src="{{ url }}" alt="{{ g.title }} screenshot" title="{{ g.title }}" class="w-[160px] h-[90px] object-cover rounded" data-src="{{ url }}" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                                                </a>
+                                                <div class="promo-thumb-popup absolute top-0 left-full ml-4 z-50 hidden min-w-[300px] max-w-[340px] bg-[#eaf2fa] text-[#222] rounded-lg shadow-2xl p-4 border border-[#bcd2e6]">
+                                                                <a href="{% url 'store:game_detail' g.slug %}"><img src="{{ url }}" class="w-full h-32 object-cover rounded mb-2" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'"></a>
+                                                    <div class="text-base font-bold mb-1">{{ g.title }}</div>
+                                                    {% if g.release_date %}<div class="text-xs text-gray-600 mb-1">Дата релиза: {{ g.release_date }}</div>{% endif %}
+                                                    {% if g.reviews %}<div class="text-xs text-gray-700 mb-1">Отзывы: {{ g.reviews }}</div>{% endif %}
+                                                    {% if g.tags %}<div class="flex flex-wrap gap-1 mt-1">{% for tag in g.tags %}<span class="bg-gray-300 text-gray-800 rounded px-2 py-1 text-xs">{{ tag }}</span>{% endfor %}</div>{% endif %}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        {% with shots=g.screenshots.all|nonheader:2 %}
+                                            {% if shots %}
+                                                {% for s in shots %}
+                                                    {% if s.image and s.image.url %}
+                                                        <div class="promo-thumb-wrap relative">
+                                                            <a href="{% url 'store:game_detail' g.slug %}" class="promo-thumb-link inline-block z-10">
+                                                                <img src="{{ s.image.url }}" alt="{{ g.title }} screenshot" title="{{ g.title }}" class="w-[160px] h-[90px] object-cover rounded" data-src="{{ s.image.url }}" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                                                            </a>
+                                                            <div class="promo-thumb-popup absolute top-0 left-full ml-4 z-50 hidden min-w-[300px] max-w-[340px] bg-[#eaf2fa] text-[#222] rounded-lg shadow-2xl p-4 border border-[#bcd2e6]">
+                                                                <a href="{% url 'store:game_detail' g.slug %}"><img src="{{ s.image.url }}" class="w-full h-32 object-cover rounded mb-2" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'"></a>
+                                                                <div class="text-base font-bold mb-1">{{ g.title }}</div>
+                                                                {% if g.release_date %}<div class="text-xs text-gray-600 mb-1">Дата релиза: {{ g.release_date }}</div>{% endif %}
+                                                                {% if g.reviews %}<div class="text-xs text-gray-700 mb-1">Отзывы: {{ g.reviews }}</div>{% endif %}
+                                                                {% if g.tags %}<div class="flex flex-wrap gap-1 mt-1">{% for tag in g.tags %}<span class="bg-gray-300 text-gray-800 rounded px-2 py-1 text-xs">{{ tag }}</span>{% endfor %}</div>{% endif %}
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                {% if g.appid %}
+                                                    <div class="promo-thumb-wrap relative">
+                                                        <a href="{% url 'store:game_detail' g.slug %}" class="inline-block z-10">
+                                                                    {% if g.cover_image %}
+                                                                        <img src="{{ g.cover_image.url }}" alt="{{ g.title }}" class="w-[160px] h-[90px] object-cover rounded" data-src="{{ g.cover_image.url }}" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                                                                        {% elif local_path|file_exists %}
+                                                                        <img src="{{ MEDIA_URL }}steam_imports/{{ g.appid }}/header.jpg" alt="{{ g.title }}" class="w-[160px] h-[90px] object-cover rounded" data-src="{{ MEDIA_URL }}steam_imports/{{ g.appid }}/header.jpg" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                                                                    {% else %}
+                                                                        <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ g.appid }}/header.jpg" alt="{{ g.title }}" class="w-[160px] h-[90px] object-cover rounded" data-src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ g.appid }}/header.jpg">
+                                                                    {% endif %}
+                                                                </a>
+                                                                <div class="promo-thumb-popup absolute top-0 left-full ml-4 z-50 hidden min-w-[300px] max-w-[340px] bg-[#eaf2fa] text-[#222] rounded-lg shadow-2xl p-4 border border-[#bcd2e6]">
+                                                                    <a href="{% url 'store:game_detail' g.slug %}">
+                                                                        {% if g.cover_image %}
+                                                                            <img src="{{ g.cover_image.url }}" class="w-full h-32 object-cover rounded mb-2" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                                                                        {% elif local_path|file_exists %}
+                                                                            <img src="{{ MEDIA_URL }}steam_imports/{{ g.appid }}/header.jpg" class="w-full h-32 object-cover rounded mb-2" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                                                                        {% else %}
+                                                                            <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ g.appid }}/header.jpg" class="w-full h-32 object-cover rounded mb-2">
+                                                                        {% endif %}
+                                                                    </a>
+                                                            <div class="text-base font-bold mb-1">{{ g.title }}</div>
+                                                            {% if g.release_date %}<div class="text-xs text-gray-600 mb-1">Дата релиза: {{ g.release_date }}</div>{% endif %}
+                                                            {% if g.reviews %}<div class="text-xs text-gray-700 mb-1">Отзывы: {{ g.reviews }}</div>{% endif %}
+                                                            {% if g.tags %}<div class="flex flex-wrap gap-1 mt-1">{% for tag in g.tags %}<span class="bg-gray-300 text-gray-800 rounded px-2 py-1 text-xs">{{ tag }}</span>{% endfor %}</div>{% endif %}
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="w-[120px] h-[68px] bg-gray-700 rounded"></div>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% endif %}
+                                </div>
+
+                                {% if g.appid %}
+                                    {% steam_tags g.appid 5 as gtags %}
+                                    {% if gtags %}
+                                    <div class="flex flex-wrap gap-2 mb-3 w-full justify-end">
+                                        {% for t in gtags %}
+                                            <span class="text-xs bg-[#072a2e] text-green-200 px-2 py-1 rounded">{{ t }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                {% endif %}
+
+                                <!-- "Подробнее" button removed — whole promo is clickable -->
+
+                                <!-- Footer: icons + discount on left, price on right -->
+                                <div class="mt-4 flex items-center justify-between w-full promo-footer">
+                                    <div class="flex items-center gap-3">
+                                            <div class="flex items-center gap-2">
+                                                {% if g.discount %}
+                                                <span class="bg-green-500 text-xs px-2 py-1 rounded font-bold">-{{ g.discount }}%</span>
+                                                <span class="line-through text-gray-400 text-sm">{{ g.original_price|default:g.price }} {{ g.currency }}</span>
+                                                {% endif %}
+                                            </div>
+                                        <div class="flex items-center gap-2 text-gray-300">
+                                            <img src="{% static 'icons/windows.svg' %}" alt="Windows" title="Windows" class="w-4 h-4" />
+                                            <img src="{% static 'icons/mac.svg' %}" alt="macOS" title="macOS" class="w-4 h-4" />
+                                            <img src="{% static 'icons/linux.svg' %}" alt="Linux" title="Linux" class="w-4 h-4" />
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-sm text-gray-400">{% trans 'Цена' %}</div>
+                                        <div class="text-xl font-bold text-white">
+                                            {# avoid complex expressions inside if — compute formatted price first #}
+                                            {% with price_str=g.price|floatformat:2 %}
+                                                {% if g.price %}
+                                                    {% if price_str == "0.00" or g.price == 0 or g.is_free %}
+                                                        <span class="promo-price free">{% trans 'Бесплатно' %}</span>
+                                                    {% else %}
+                                                        <span class="promo-price">{{ g.price }} {{ g.currency }}</span>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endwith %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+                    </div>
+
+                    <!-- navigation arrows (restore left/right controls) -->
+                    <button type="button" tabindex="0" aria-label="{% trans 'Предыдущий слайд' %}" class="absolute left-3 md:left-6 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-sm w-14 h-14 rounded-full text-white promo-prev shadow-2xl z-50 flex items-center justify-center transition-transform duration-200 hover:scale-110 hover:-translate-x-1 focus:outline-none focus:ring-2 focus:ring-white/50">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M12 15L7 10l5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    <button type="button" tabindex="0" aria-label="{% trans 'Следующий слайд' %}" class="absolute right-3 md:right-6 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-sm w-14 h-14 rounded-full text-white promo-next shadow-2xl z-50 flex items-center justify-center transition-transform duration-200 hover:scale-110 hover:translate-x-1 focus:outline-none focus:ring-2 focus:ring-white/50">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M8 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </button>
+
+                    </div>
+                {% else %}
+                <div class="text-gray-400 p-4">{% trans 'Нет промо-материалов' %}</div>
+                {% endif %}
+        </div>
+
+        <!-- Indicators centered below the entire promo block -->
+        {% if paid_promos %}
+    <div class="mt-8 flex justify-center">
+            <div class="indicators-wrap promo-indicators flex items-center gap-2">
+                {% for p in paid_promos %}
+                    {% if forloop.first %}
+                    <button type="button" tabindex="0" role="button" aria-pressed="true" aria-label="Перейти к слайду {{ forloop.counter }}" class="promo-dot active" data-index="{{ forloop.counter0 }}">
+                        <span class="sr-only">Перейти к слайду {{ forloop.counter }}</span>
+                    </button>
+                    {% else %}
+                    <button type="button" tabindex="0" role="button" aria-pressed="false" aria-label="Перейти к слайду {{ forloop.counter }}" class="promo-dot" data-index="{{ forloop.counter0 }}">
+                        <span class="sr-only">Перейти к слайду {{ forloop.counter }}</span>
+                    </button>
+                    {% endif %}
+                {% endfor %}
+                
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- External CSS file for styles -->
+        <link rel="stylesheet" href="{% static 'store/promo.css' %}">
+        <!-- Inline JS: простая логика переключения слайдов для секции промо -->
+        <script src="{% static 'store/promo.js' %}"></script>
+
+        <!-- products panel JS removed from index; game_list page now contains full filters UI -->
+
+        <!-- Categories carousel: if `categories` not provided, build from catalog tags -->
+        <div class="categories-section mt-6 mb-8">
+            <h2 class="text-xl font-semibold mb-3 text-white">{% trans 'Категории' %}</h2>
+            {% if not categories %}
+                {% catalog_categories catalog 24 as categories %}
+            {% endif %}
+
+            {% if categories %}
+            <div class="categories-carousel relative bg-transparent">
+                <button type="button" aria-label="{% trans 'Предыдущие категории' %}" class="cat-prev absolute left-0 top-1/2 -translate-y-1/2 z-40 bg-black/40 text-white w-9 h-9 rounded-full flex items-center justify-center">‹</button>
+                <div class="cat-track overflow-x-auto scroll-smooth pl-12 pr-12 flex gap-4 items-stretch py-2 snap-x snap-mandatory" tabindex="0">
+                    {% for category in categories %}
+                        {% with name=category.name|default:category slug=category.slug|default:category %}
+                            {% category_cover slug catalog as cat_img %}
+                            <a href="{% url 'store:game_list' %}?category={{ slug }}" class="category-card relative snap-start w-[300px] h-[168px] rounded-md overflow-hidden flex-shrink-0 focus:outline-none">
+                                <span class="absolute inset-0 bg scale-105" style="background-image:url('{{ cat_img }}')"></span>
+                                <span class="absolute inset-0 category-gradient"></span>
+                                <span class="absolute left-4 bottom-4">
+                                    <span class="category-label">{{ name }}</span>
+                                </span>
+                            </a>
+                        {% endwith %}
+                    {% endfor %}
+                </div>
+                <button type="button" aria-label="{% trans 'Следующие категории' %}" class="cat-next absolute right-0 top-1/2 -translate-y-1/2 z-40 bg-black/40 text-white w-9 h-9 rounded-full flex items-center justify-center">›</button>
+            </div>
+            {% else %}
+            <div class="text-gray-400">{% trans 'Категории не найдены' %}</div>
+            {% endif %}
+            <script>
+                (function(){
+                    const track = document.querySelector('.cat-track');
+                    const prev = document.querySelector('.cat-prev');
+                    const next = document.querySelector('.cat-next');
+                    if(!track) return;
+                    const scrollByAmount = () => Math.round(track.clientWidth * 0.7);
+                    prev?.addEventListener('click', () => track.scrollBy({ left: -scrollByAmount(), behavior: 'smooth' }));
+                    next?.addEventListener('click', () => track.scrollBy({ left: scrollByAmount(), behavior: 'smooth' }));
+                    // keyboard accessibility
+                    track.addEventListener('keydown', (e) => {
+                        if(e.key === 'ArrowRight') { track.scrollBy({ left: 200, behavior: 'smooth' }); }
+                        if(e.key === 'ArrowLeft') { track.scrollBy({ left: -200, behavior: 'smooth' }); }
+                    });
+                })();
+            </script>
+        </div>
+
+        {# Products panel removed from index to reduce page weight; users go to `store:game_list` for full filters + grid. #}
+
+        <!-- Button to open full products panel (replaces inline "Больше продуктов" list) -->
+        <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-2xl font-semibold mb-0 text-white">Скидки и мероприятия</h2>
+            <a href="{% url 'store:game_list' %}" id="open-products-panel" role="button" class="ml-4 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow focus:outline-none focus:ring-2 focus:ring-white/30" aria-haspopup="true">
+                {% trans 'Больше продуктов' %}
+            </a>
+        </div>
+        <div class="mb-10">
+            <div class="deals-carousel bg-[#0b2630] border border-[#072024] rounded-lg p-4 overflow-hidden shadow-lg">
+                {% if catalog|length >= 1 %}
+                <div class="deals-inner flex gap-6 items-stretch">
+                    {% comment %} Left large tile + two stacked right tiles (first 3 items) {% endcomment %}
+                    <div class="flex-1">
+                        {% with game=catalog.0 local_path="steam_imports/"|add:catalog.0.appid|add:"/header.jpg" %}
+                            {% if game %}
+                                <div class="deal-left bg-[#1b2838] rounded overflow-hidden relative shadow-lg">
+                                    <a href="{% url 'store:game_detail' game.slug %}" class="absolute inset-0 z-10" aria-label="Перейти к странице игры {{ game.title }}"><span class="sr-only">Перейти к странице игры {{ game.title }}</span></a>
+                                    <div class="deal-media relative">
+                                        {% if game.cover_image %}
+                                            <img src="{{ game.cover_image.url }}" alt="{{ game.title }}" class="w-full h-full object-cover">
+                                        {% elif local_path|file_exists %}
+                                            <img src="{{ MEDIA_URL }}steam_imports/{{ game.appid }}/header.jpg" alt="{{ game.title }}" class="w-full h-full object-cover">
+                                        {% else %}
+                                            <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ game.appid }}/header.jpg" alt="{{ game.title }}" class="w-full h-full object-cover">
+                                        {% endif %}
+                                        <div class="deal-info-band absolute left-0 bottom-0 w-full py-3 px-4 bg-gradient-to-t from-[#0d4f66] via-[#0b3b49] to-transparent text-white flex items-center justify-between">
+                                            <div class="deal-info-left">
+                                                <div class="text-lg font-semibold">{{ game.title }}</div>
+                                                <div class="text-xs text-blue-100">Заканчивается 10 ноя в 20:00.</div>
+                                            </div>
+                                            {% if game.discount %}
+                                                <div class="discount-badge text-right">
+                                                    <div class="discount-percent inline-block bg-[#4caf50] text-white font-bold text-lg px-3 py-1 rounded">-{{ game.discount }}%</div>
+                                                    <div class="discount-prices mt-1 text-xs">
+                                                        {% if game.original_price %}<span class="line-through text-slate-200 text-[11px] mr-1">{{ game.original_price }} {{ game.currency }}</span>{% endif %}
+                                                        <span class="inline-block bg-[#b6e29a] text-[#08320a] px-2 py-0.5 rounded text-sm font-bold">{{ game.price }} {{ game.currency }}</span>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <div class="text-sm font-bold">{% if game.price == 0 or game.is_free %}{% trans 'Бесплатно' %}{% else %}{{ game.price }} {{ game.currency }}{% endif %}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+
+                    <div class="w-[360px] flex flex-col gap-4">
+                        {% for game in catalog|slice:"1:3" %}
+                            {% with local_path="steam_imports/"|add:game.appid|add:"/header.jpg" %}
+                                <div class="deal-small bg-[#13262f] rounded overflow-hidden shadow-md relative">
+                                    <a href="{% url 'store:game_detail' game.slug %}" class="absolute inset-0 z-10" aria-label="Перейти к странице игры {{ game.title }}"><span class="sr-only">Перейти к странице игры {{ game.title }}</span></a>
+                                    <div class="h-40 overflow-hidden relative">
+                                        {% if game.cover_image %}
+                                            <img src="{{ game.cover_image.url }}" alt="{{ game.title }}" class="w-full h-full object-cover">
+                                        {% elif local_path|file_exists %}
+                                            <img src="{{ MEDIA_URL }}steam_imports/{{ game.appid }}/header.jpg" alt="{{ game.title }}" class="w-full h-full object-cover">
+                                        {% else %}
+                                            <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ game.appid }}/header.jpg" alt="{{ game.title }}" class="w-full h-full object-cover">
+                                        {% endif %}
+                                        <div class="deal-info-band absolute left-0 bottom-0 w-full py-2 px-3 bg-gradient-to-t from-[#0d4f66] via-[#0b3b49] to-transparent text-white flex items-center justify-between">
+                                            <div class="text-xs text-blue-100">Акция дня!</div>
+                                            <div class="text-right">
+                                                {% if game.discount %}
+                                                    <div class="inline-flex items-center gap-2">
+                                                        <span class="inline-block bg-[#4caf50] text-white font-bold px-2 py-1 rounded text-xs">-{{ game.discount }}%</span>
+                                                        <div class="inline-flex items-center gap-2">
+                                                            {% if game.original_price %}<span class="line-through text-slate-200 text-[11px]">{{ game.original_price }} {{ game.currency }}</span>{% endif %}
+                                                            <span class="inline-block bg-[#b6e29a] text-[#08320a] px-2 py-0.5 rounded text-sm font-bold">{{ game.price }} {{ game.currency }}</span>
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="text-sm font-bold">{% if game.price == 0 or game.is_free %}{% trans 'Бесплатно' %}{% else %}{{ game.price }} {{ game.currency }}{% endif %}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endwith %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                <!-- optional arrows for future interactivity -->
+                <button class="deals-prev absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 w-12 h-12 rounded-full text-white flex items-center justify-center shadow z-30">‹</button>
+                <button class="deals-next absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 w-12 h-12 rounded-full text-white flex items-center justify-center shadow z-30">›</button>
+            </div>
+        </div>
+
+        {# The products grid has been moved into the products panel above. #}
+
+        <!-- Хиты продаж -->
+        <div class="mt-12">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-semibold text-white">{% trans 'Хиты продаж' %}</h2>
+                <a href="{% url 'store:game_list' %}?sort=-rating" class="text-sm text-blue-300 hover:text-blue-200">Перейти в каталог →</a>
+            </div>
+            {% if top_sellers %}
+            <div class="home-grid grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {% for g in top_sellers %}
+                {% with local_path="steam_imports/"|add:g.appid|add:"/header.jpg" %}
+                <a href="{% url 'store:game_detail' g.slug %}" class="block bg-[#0b2630] border border-[#072024] rounded-lg overflow-hidden hover:scale-[1.01] transition">
+                    <div class="card-media relative aspect-[16/9] bg-[#1b2838]">
+                        {% if g.cover_image %}
+                            <img src="{{ g.cover_image.url }}" alt="{{ g.title }}" class="w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                        {% elif local_path|file_exists %}
+                            <img src="{{ MEDIA_URL }}steam_imports/{{ g.appid }}/header.jpg" alt="{{ g.title }}" class="w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                        {% else %}
+                            {% with shots=g.screenshots.all|nonheader:1 %}
+                                {% if shots and shots.0 and shots.0.image %}
+                                    <img src="{{ shots.0.image.url }}" alt="{{ g.title }}" class="w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                                {% else %}
+                                    <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ g.appid }}/header.jpg" alt="{{ g.title }}" class="w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                        {% if g.discount_percent %}
+                        <span class="absolute left-2 top-2 bg-green-600/90 text-white text-xs px-2 py-1 rounded">-{{ g.discount_percent }}%</span>
+                        {% endif %}
+                    </div>
+                    <div class="p-3 text-white">
+                        <div class="font-semibold truncate" title="{{ g.title }}">{{ g.title }}</div>
+                        <div class="mt-1 text-sm text-blue-100">
+                            {% if g.discount_percent and g.original_price %}
+                                <span class="line-through opacity-70 mr-2">{{ g.original_price|floatformat:2 }} {{ g.currency }}</span>
+                            {% endif %}
+                            {% if g.price == 0 or g.is_free %}{% trans 'Бесплатно' %}{% else %}{{ g.price|floatformat:2 }} {{ g.currency }}{% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endwith %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-gray-400">Пока нет данных.</div>
+            {% endif %}
+        </div>
+
+        <!-- Новые релизы -->
+        <div class="mt-12">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-semibold text-white">{% trans 'Новые релизы' %}</h2>
+                <a href="{% url 'store:game_list' %}?sort=-created" class="text-sm text-blue-300 hover:text-blue-200">Перейти в каталог →</a>
+            </div>
+            {% if new_releases %}
+            <div class="home-grid grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                {% for g in new_releases %}
+                {% with local_path="steam_imports/"|add:g.appid|add:"/header.jpg" %}
+                <a href="{% url 'store:game_detail' g.slug %}" class="block bg-[#0b2630] border border-[#072024] rounded-lg overflow-hidden hover:scale-[1.01] transition">
+                    <div class="card-media relative aspect-[16/9] bg-[#1b2838]">
+                        {% if g.cover_image %}
+                            <img src="{{ g.cover_image.url }}" alt="{{ g.title }}" class="w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                        {% elif local_path|file_exists %}
+                            <img src="{{ MEDIA_URL }}steam_imports/{{ g.appid }}/header.jpg" alt="{{ g.title }}" class="w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                        {% else %}
+                            {% with shots=g.screenshots.all|nonheader:1 %}
+                                {% if shots and shots.0 and shots.0.image %}
+                                    <img src="{{ shots.0.image.url }}" alt="{{ g.title }}" class="w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                                {% else %}
+                                    <img src="https://cdn.cloudflare.steamstatic.com/steam/apps/{{ g.appid }}/header.jpg" alt="{{ g.title }}" class="w-full h-full object-cover" loading="lazy" onerror="this.onerror=null;this.src='{% static 'store/img/placeholder.svg' %}'">
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                        {% if g.release_date %}
+                        <span class="absolute left-2 top-2 bg-black/60 text-white text-[10px] px-2 py-0.5 rounded">{{ g.release_date }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="p-3 text-white">
+                        <div class="font-semibold truncate" title="{{ g.title }}">{{ g.title }}</div>
+                        <div class="mt-1 text-sm text-blue-100">
+                            {% if g.discount_percent and g.original_price %}
+                                <span class="line-through opacity-70 mr-2">{{ g.original_price|floatformat:2 }} {{ g.currency }}</span>
+                            {% endif %}
+                            {% if g.price == 0 or g.is_free %}{% trans 'Бесплатно' %}{% else %}{{ g.price|floatformat:2 }} {{ g.currency }}{% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endwith %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-gray-400">Пока нет данных.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,388 @@
+{% load static i18n %}
+<!doctype html>
+<html lang="{{ request.LANGUAGE_CODE|default:'en' }}">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block meta_title %}Steam Clone{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Магазин игр SteamClone – каталог, скидки, библиотека и кошелёк.{% endblock %}">
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+    <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="//cdn.cloudflare.steamstatic.com">
+    {% block meta_social %}
+    <meta property="og:site_name" content="SteamClone">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{% block og_title %}Steam Clone{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Магазин игр SteamClone – каталог, скидки, библиотека и кошелёк.{% endblock %}">
+    {% if og_image %}<meta property="og:image" content="{{ og_image }}">{% endif %}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block tw_title %}Steam Clone{% endblock %}">
+    <meta name="twitter:description" content="{% block tw_description %}Магазин игр SteamClone – каталог, скидки, библиотека и кошелёк.{% endblock %}">
+    {% if og_image %}<meta name="twitter:image" content="{{ og_image }}">{% endif %}
+    {% endblock %}
+    <!-- Tailwind via CDN for rapid prototyping -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* small tweaks to better match steam-like dark gradients */
+        .steam-header {
+            background: linear-gradient(180deg, #0b2a3a 0%, #07202a 100%);
+        }
+        /* visual helper classes used across templates */
+        .promo-big-shadow {
+            box-shadow: 0 20px 40px rgba(0,0,0,0.55);
+        }
+        /* skeleton placeholder for lazy images */
+        .skeleton { background-size: 200% 200%; }
+    </style>
+</head>
+
+<body class="bg-[#071722] text-gray-100 font-sans">
+    <header class="steam-header text-gray-100">
+        <div class="container mx-auto flex items-center justify-between px-4 py-3">
+            <div class="flex items-center gap-6">
+                <a href="{% url 'store:home' %}" class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-black font-bold">
+                        SC</div>
+                    <span class="text-xl font-semibold">SteamClone</span>
+                </a>
+
+                <nav class="hidden lg:flex items-center gap-6 text-sm">
+                    <div class="relative" id="main-menu-wrap">
+                        <a id="main-menu-trigger" href="{% url 'store:home' %}"
+                           class="hover:underline flex items-center gap-1 select-none"
+                           aria-haspopup="true" aria-expanded="false">
+                            {% trans 'МАГАЗИН' %}
+                            <svg class="w-3 h-3 opacity-80" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"/></svg>
+                        </a>
+                        <div id="main-menu-panel" class="absolute left-0 top-full mt-2 w-56 bg-[#1b2838]/95 backdrop-blur-sm border border-[#0a1e24] rounded shadow-xl hidden z-50">
+                            <ul class="py-1" role="menu" aria-label="{% trans 'Навигация магазина' %}">
+                                <li>
+                                    <a class="block px-4 py-2 hover:bg-[#0e3b4a]" href="{% url 'store:home' %}" role="menuitem">{% trans 'Главная' %}</a>
+                                </li>
+                                <li>
+                                    <a class="block px-4 py-2 hover:bg-[#0e3b4a]" href="{% url 'store:charts' %}" role="menuitem">{% trans 'Чарты' %}</a>
+                                </li>
+                                <li>
+                                    <a class="block px-4 py-2 hover:bg-[#0e3b4a]" href="{% url 'store:recommendations' %}" role="menuitem">{% trans 'Рекомендации' %}</a>
+                                </li>
+                                {# по просьбе: в магазине не показываем "Мои заказы" #}
+                                <li>
+                                    {% if user.is_authenticated %}
+                                    <a class="block px-4 py-2 hover:bg-[#0e3b4a]" href="{% url 'store:wishlist' %}" role="menuitem">{% trans 'Список желаемого' %}</a>
+                                    {% else %}
+                                    <a class="block px-4 py-2 hover:bg-[#0e3b4a]" href="{% url 'login' %}?next={% url 'store:wishlist' %}" role="menuitem">{% trans 'Список желаемого' %}</a>
+                                    {% endif %}
+                                </li>
+                                {# убрали неиспользуемые пункты меню #}
+                                <li class="border-t border-[#0a1e24] mt-1 pt-1">
+                                    <a class="block px-4 py-2 hover:bg-[#0e3b4a]" href="{% url 'store:about' %}" role="menuitem">{% trans 'Информация' %}</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'store:library' %}" class="hover:underline">{% trans 'БИБЛИОТЕКА' %}</a>
+                    {% endif %}
+                    <a href="{% url 'store:support' %}" class="hover:underline">{% trans 'ПОДДЕРЖКА' %}</a>
+                </nav>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="hidden md:block relative" id="site-search-wrap">
+                    <form action="{% url 'store:game_list' %}" method="get">
+                        <input name="q" id="site-search-input" placeholder="{% trans 'Поиск по магазину' %}" autocomplete="off"
+                            class="rounded-md px-3 py-1 bg-[#0f2b36] placeholder-gray-400 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-white/30" />
+                    </form>
+                    <div id="site-search-suggest" class="absolute left-0 mt-1 w-[28rem] max-w-[80vw] bg-[#0c2129] border border-[#0a1e24] rounded-md shadow-2xl overflow-hidden hidden z-50">
+                        <ul id="site-search-list" class="divide-y divide-[#0a1e24]"></ul>
+                    </div>
+                </div>
+                <span class="md:hidden inline-flex items-center text-xs px-2 py-0.5 rounded bg-black/30 border border-white/10" title="{% trans 'Активный язык' %}">{{ request.LANGUAGE_CODE|upper }}</span>
+                {% if user.is_authenticated %}
+                                <div class="relative" id="lang-switch-wrap">
+                                    <select id="lang-switch" class="text-sm bg-[#0f2b36] rounded px-2 py-1 border border-[#1c4a5b]">
+                                        {% get_current_language as CURRENT_LANG %}
+                                        {% get_available_languages as LANGS %}
+                                        {% for code,name in LANGS %}
+                                            <option value="{{ code }}" {% if code == CURRENT_LANG %}selected{% endif %}>{{ code|upper }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                <div class="relative flex items-center gap-2" id="account-menu-wrap">
+                    <!-- Username links to profile; balance below; dropdown on arrow; avatar on the right -->
+                    <a href="{% url 'store:profile' user.username %}" class="leading-tight group select-none">
+                        <div class="text-sm font-medium group-hover:underline">{{ user.username }}</div>
+                        <div class="text-[11px] text-blue-200" title="{% trans 'Баланс кошелька' %}">
+                            {% with cur=user.profile.preferred_currency bal=user.profile.balance %}
+                                {{ bal|floatformat:2 }}{% if cur == 'UAH' %}₴{% else %} {{ cur }}{% endif %}
+                            {% endwith %}
+                        </div>
+                    </a>
+                    <button id="account-menu-trigger" type="button" class="p-1 rounded hover:bg-[#0e3b4a]" aria-haspopup="true" aria-expanded="false" title="{% trans 'Меню аккаунта' %}">
+                        <svg class="w-4 h-4 opacity-80" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"/></svg>
+                    </button>
+                    <a href="{% url 'store:profile' user.username %}" class="block" title="{% trans 'Профиль' %}">
+                        {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" alt="avatar" class="w-8 h-8 rounded border border-white/20 object-cover" width="32" height="32" loading="lazy">
+                        {% elif user.profile.steam_avatar %}
+                        <img src="{{ user.profile.steam_avatar }}" alt="avatar" class="w-8 h-8 rounded border border-white/20 object-cover" width="32" height="32" loading="lazy">
+                        {% else %}
+                        <div class="w-8 h-8 rounded bg-black/30 border border-white/10 flex items-center justify-center text-xs">?</div>
+                        {% endif %}
+                    </a>
+                    <div id="account-menu-panel" class="absolute right-0 top-full mt-2 w-60 bg-[#1b2838]/95 backdrop-blur-sm border border-[#0a1e24] rounded shadow-xl hidden z-50">
+                        <ul class="py-1" role="menu" aria-label="Меню аккаунта">
+                            <li class="px-4 py-2 text-xs text-gray-400 uppercase tracking-wide">Аккаунт</li>
+                            <li>
+                                <a href="{% url 'store:wallet_topup' %}" class="flex items-center justify-between px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">
+                                    <span>Баланс</span>
+                                    <span class="text-blue-200 font-medium">{% with cur=user.profile.preferred_currency bal=user.profile.balance %}{{ bal|floatformat:2 }}{% if cur == 'UAH' %}₴{% else %} {{ cur }}{% endif %}{% endwith %}</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{% url 'store:orders_list' %}" class="block px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">{% trans 'Мои заказы' %}</a>
+                            </li>
+                            <li><a href="{% url 'store:wallet_topup' %}" class="block px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">{% trans 'Кошелёк' %}</a></li>
+                            <li><a href="{% url 'store:friends' %}" class="block px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">{% trans 'Друзья' %}</a></li>
+                            <li><a href="{% url 'store:subscriptions' %}" class="block px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">{% trans 'Подписки' %}</a></li>
+                            <li><a href="{% url 'store:notifications' %}" class="block px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">{% trans 'Уведомления' %}</a></li>
+                            <li class="border-t border-[#0a1e24] mt-1 pt-1"><a href="{% url 'store:profile_edit' %}" class="block px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">{% trans 'Редактировать профиль' %}</a></li>
+                            <li><a href="{% url 'store:settings_default' %}" class="block px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">{% trans 'Настройки' %}</a></li>
+                            <li class="border-t border-[#0a1e24] mt-1 pt-1"><form action="{% url 'store:logout' %}" method="post">{% csrf_token %}<button type="submit" class="w-full text-left px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">{% trans 'Выйти' %}</button></form></li>
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+                <a href="{% url 'store:cart' %}" class="text-sm px-3 py-1 hover:bg-[#0e3b4a] rounded">{% trans 'Корзина' %}{% if user.is_authenticated %} (<span id="cart-count">{{ user.cart_items.count }}</span>){% endif %}</a>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'login' %}?next={{ request.path }}" class="text-sm px-3 py-1 bg-[#1b6b80] rounded">{% trans 'Войти' %}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4">
+        {% if messages %}
+        <div class="mb-4 space-y-2">
+            {% for message in messages %}
+                <div class="px-4 py-2 rounded {{ message.tags|default:'info'|yesno:'bg-green-900,bg-yellow-900,bg-red-900' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="text-center p-6 text-sm text-gray-400">
+        &copy; 2025 SteamClone
+    </footer>
+
+    <!-- small global scripts for UI (kept minimal) -->
+    <script>
+                                // Language switch AJAX
+                                (function(){
+                                    const sel = document.getElementById('lang-switch');
+                                    if(!sel) return;
+                                    sel.addEventListener('change', ()=>{
+                                        const lang = sel.value;
+                                        fetch('{% url 'store:lang_set' %}', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'X-CSRFToken': (document.querySelector('input[name=csrfmiddlewaretoken]')||{}).value || (function(){
+                                                    const m = document.cookie.match(/csrftoken=([^;]+)/); return m?m[1]:''; })()
+                                            },
+                                            body: JSON.stringify({lang})
+                                        }).then(r=>r.json()).then(d=>{ if(d.ok){ window.location.reload(); } });
+                                    });
+                                })();
+                (function(){
+                    // --- Store main dropdown: keep open on hover and allow click ---
+                    const mmWrap = document.getElementById('main-menu-wrap');
+                    const mmTrigger = document.getElementById('main-menu-trigger');
+                    const mmPanel = document.getElementById('main-menu-panel');
+                    if (mmWrap && mmTrigger && mmPanel){
+                        let hideT;
+                        const openMenu = () => {
+                            clearTimeout(hideT);
+                            mmPanel.classList.remove('hidden');
+                            mmTrigger.setAttribute('aria-expanded','true');
+                        };
+                        const closeMenu = () => {
+                            hideT = setTimeout(() => {
+                                mmPanel.classList.add('hidden');
+                                mmTrigger.setAttribute('aria-expanded','false');
+                            }, 120);
+                        };
+                        mmTrigger.addEventListener('mouseenter', openMenu);
+                        mmTrigger.addEventListener('focus', openMenu);
+                        mmWrap.addEventListener('mouseenter', openMenu);
+                        mmWrap.addEventListener('mouseleave', closeMenu);
+                        mmPanel.addEventListener('mouseenter', openMenu);
+                        mmPanel.addEventListener('mouseleave', closeMenu);
+                        document.addEventListener('click', (e)=>{
+                            if (!mmWrap.contains(e.target)){
+                                mmPanel.classList.add('hidden');
+                                mmTrigger.setAttribute('aria-expanded','false');
+                            }
+                        });
+                        document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ mmPanel.classList.add('hidden'); mmTrigger.setAttribute('aria-expanded','false'); }});
+                    }
+
+                    const wrap = document.getElementById('site-search-wrap');
+                    const input = document.getElementById('site-search-input');
+                    const panel = document.getElementById('site-search-suggest');
+                    const list = document.getElementById('site-search-list');
+                    if(!wrap || !input || !panel || !list) return;
+                    let t = 0;
+                    function hide(){ panel.classList.add('hidden'); }
+                    function show(){ panel.classList.remove('hidden'); }
+                            const FREE_TEXT = "{% trans 'Бесплатно' %}";
+                            function render(items){
+                        list.innerHTML = '';
+                        if(!items || !items.length){ hide(); return; }
+                        const frag = document.createDocumentFragment();
+                        items.forEach(it => {
+                            const li = document.createElement('li');
+                            li.className = 'hover:bg-[#11303a]';
+                            const a = document.createElement('a');
+                            a.href = it.slug ? ('{% url 'store:game_detail' 'SLUG_PLACEHOLDER' %}'.replace('SLUG_PLACEHOLDER', it.slug)) : '#';
+                            a.className = 'flex items-center gap-3 p-2 text-sm text-white';
+                            const img = document.createElement('img');
+                            img.src = it.image || '{% static 'store/img/placeholder.svg' %}';
+                            img.alt = it.title || '';
+                            img.width = 84; img.height = 47; img.loading = 'lazy';
+                            img.className = 'w-[84px] h-[47px] object-cover rounded';
+                            const meta = document.createElement('div');
+                            meta.className = 'flex-1 min-w-0';
+                            const t = document.createElement('div');
+                            t.className = 'truncate font-semibold';
+                            t.textContent = it.title || '';
+                            const p = document.createElement('div');
+                            p.className = 'text-xs text-blue-200';
+                            p.textContent = (it.price && it.price > 0) ? `${it.price.toFixed(2)} ${it.currency || ''}` : FREE_TEXT;
+                            meta.appendChild(t); meta.appendChild(p);
+                            a.appendChild(img); a.appendChild(meta);
+                            li.appendChild(a); frag.appendChild(li);
+                        });
+                        list.appendChild(frag); show();
+                    }
+                    function fetchSuggest(q){
+                        const u = new URL('{% url 'store:search_suggest' %}', window.location.origin);
+                        u.searchParams.set('q', q);
+                        fetch(u.toString(), { credentials: 'same-origin' })
+                            .then(r => r.ok ? r.json() : { items: [] })
+                            .then(d => render(d.items || []))
+                            .catch(() => hide());
+                    }
+                    input.addEventListener('input', () => {
+                        const q = input.value.trim();
+                        if(q.length < 2){ hide(); return; }
+                        clearTimeout(t); t = setTimeout(() => fetchSuggest(q), 160);
+                    });
+                    input.addEventListener('focus', () => { if(list.children.length) show(); });
+                    document.addEventListener('click', (e) => { if(!wrap.contains(e.target)) hide(); });
+                    document.addEventListener('keydown', (e) => { if(e.key === 'Escape') hide(); });
+                })();
+
+                // --- Account menu dropdown ---
+                (function(){
+                    const wrap = document.getElementById('account-menu-wrap');
+                    if(!wrap) return;
+                    const trigger = document.getElementById('account-menu-trigger');
+                    const panel = document.getElementById('account-menu-panel');
+                    let hideT;
+                    const open = () => { clearTimeout(hideT); panel.classList.remove('hidden'); trigger.setAttribute('aria-expanded','true'); };
+                    const close = () => { hideT = setTimeout(()=>{ panel.classList.add('hidden'); trigger.setAttribute('aria-expanded','false'); },120); };
+                    trigger.addEventListener('mouseenter', open);
+                    trigger.addEventListener('click', (e)=>{ e.preventDefault(); panel.classList.toggle('hidden'); const exp = panel.classList.contains('hidden') ? 'false':'true'; trigger.setAttribute('aria-expanded',exp);});
+                    wrap.addEventListener('mouseenter', open);
+                    wrap.addEventListener('mouseleave', close);
+                    panel.addEventListener('mouseenter', open);
+                    panel.addEventListener('mouseleave', close);
+                    document.addEventListener('click', (e)=>{ if(!wrap.contains(e.target)){ panel.classList.add('hidden'); trigger.setAttribute('aria-expanded','false'); } });
+                    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ panel.classList.add('hidden'); trigger.setAttribute('aria-expanded','false'); trigger.focus(); } });
+                })();
+
+                // --- AJAX add to cart / wishlist (no page reload) ---
+                (function(){
+                    function getCSRF(){
+                        const inp = document.querySelector('input[name=csrfmiddlewaretoken]');
+                        if (inp) return inp.value;
+                        const m = document.cookie.match(/csrftoken=([^;]+)/);
+                        return m ? m[1] : '';
+                    }
+                    function updateCartCount(n){
+                        const el = document.getElementById('cart-count');
+                        if (el && (typeof n === 'number' || (typeof n === 'string' && n !== ''))){
+                            el.textContent = String(n);
+                        }
+                    }
+                    async function postAjax(url, formData){
+                        const resp = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCSRF() },
+                            body: formData,
+                            credentials: 'same-origin'
+                        });
+                        // Best-effort JSON parse
+                        try{ return await resp.json(); }catch(_){ return { ok:false }; }
+                    }
+                    // Delegate submit
+                    document.addEventListener('submit', async (e)=>{
+                        const form = e.target;
+                        if (!(form instanceof HTMLFormElement)) return;
+                        const isCart = form.classList.contains('js-cart-add');
+                        const isWish = form.classList.contains('js-wishlist-toggle');
+                        if (!isCart && !isWish) return;
+                        e.preventDefault();
+                        const btn = form.querySelector('button[type="submit"],button');
+                        const origText = btn ? btn.textContent : '';
+                        if (btn){ btn.disabled = true; btn.classList.add('opacity-70'); }
+                        try{
+                            const fd = new FormData(form);
+                            const data = await postAjax(form.action, fd);
+                            if (!data || data.ok !== true){
+                                // fallback to normal submit on failure
+                                form.submit();
+                                return;
+                            }
+                            if (typeof data.cart_items !== 'undefined') updateCartCount(data.cart_items);
+                            if (isCart && btn){
+                                // If free game path resulted in owned, reflect that
+                                if (data.owned){
+                                    btn.textContent = 'В библиотеке';
+                                } else {
+                                    btn.textContent = 'В корзине';
+                                }
+                                btn.disabled = true;
+                            }
+                            if (isWish && btn){
+                                if (data.in_wishlist === true){
+                                    btn.textContent = 'В желаемом';
+                                    btn.disabled = true;
+                                } else if (data.in_wishlist === false){
+                                    // On wishlist page, remove the item row if present
+                                    const wrap = form.closest('[data-wishlist-item]');
+                                    if (wrap) wrap.remove();
+                                    // On other pages, just toggle state
+                                    if (!wrap){ btn.textContent = 'Добавлено'; btn.disabled = true; }
+                                }
+                            }
+                        } catch(_err){
+                            // fallback to normal submit if network error
+                            form.submit();
+                        } finally {
+                            // Keep disabled when succeeded; else restore if we fell back
+                            if (btn && !btn.disabled){ btn.classList.remove('opacity-70'); btn.textContent = origText; }
+                        }
+                    });
+                })();
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

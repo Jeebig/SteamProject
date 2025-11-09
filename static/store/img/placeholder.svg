@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b1f26"/>
+      <stop offset="100%" stop-color="#11303a"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#g)"/>
+  <rect x="1" y="1" width="798" height="448" fill="none" stroke="#0a1e24"/>
+  <g fill="#cfe8ef" font-family="Arial, Helvetica, sans-serif" font-size="22" text-anchor="middle">
+    <text x="400" y="230" opacity="0.9">Изображение недоступно</text>
+  </g>
+</svg>

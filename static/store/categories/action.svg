@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1f26"/>
+      <stop offset="100%" stop-color="#1d3844"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#g)"/>
+  <g opacity="0.15">
+    <circle cx="120" cy="120" r="90" fill="#6dd5ff"/>
+    <rect x="520" y="60" width="220" height="140" rx="16" fill="#ffd36d"/>
+    <rect x="240" y="260" width="320" height="120" rx="16" fill="#b86dff"/>
+  </g>
+  <g font-family="Segoe UI, Arial" fill="#eaf6fb">
+    <text x="36" y="48" font-size="16" opacity="0.8">Категория</text>
+    <text x="36" y="92" font-size="40" font-weight="700">Action</text>
+  </g>
+</svg>

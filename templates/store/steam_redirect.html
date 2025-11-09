@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="min-h-[50vh] flex items-center justify-center">
+  <div class="bg-gray-900 border border-[#0a1e24] rounded-lg p-8 w-full max-w-md text-center">
+    <div class="animate-spin inline-block w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+    <h1 class="text-xl font-semibold mt-4">Перенаправляем на Steam…</h1>
+    <p class="text-sm text-gray-400 mt-2">Если ничего не происходит, нажмите кнопку ниже.</p>
+    <a id="manual" href="/oauth/login/steam/" class="mt-4 inline-block px-4 py-2 bg-[#1b6b80] hover:bg-[#155a6b] text-white rounded">Перейти к Steam</a>
+  </div>
+</div>
+<script>
+  setTimeout(function(){ window.location.href = document.getElementById('manual').href; }, 400);
+</script>
+{% endblock %}
