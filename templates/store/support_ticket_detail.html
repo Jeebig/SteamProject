@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+<div class="max-w-3xl mx-auto bg-gray-900 rounded-lg p-6">
+  <div class="flex items-start justify-between mb-4">
+    <div>
+      <h1 class="text-2xl font-bold">{% trans 'Обращение' %} #{{ ticket.id }}</h1>
+      <div class="text-sm text-gray-300 mt-1">{{ ticket.subject }} · {{ ticket.get_status_display }}</div>
+    </div>
+    {% if is_support_admin %}
+      <form method="post" action="" class="text-sm flex items-center gap-2">
+        {% csrf_token %}
+        <label class="mr-1">Статус:</label>
+        <select name="status" class="bg-gray-800 rounded px-2 py-1">
+          {% for key,label in ticket.STATUS_CHOICES %}
+            <option value="{{ key }}" {% if ticket.status == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="px-3 py-1 rounded bg-blue-600">Обновить</button>
+      </form>
+      <form method="post" action="" class="text-sm ml-3" onsubmit="return confirm('Удалить это обращение? Это действие нельзя отменить.');">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="delete" />
+        <button type="submit" class="px-3 py-1 rounded bg-red-700 hover:bg-red-800">Удалить тикет</button>
+      </form>
+    {% endif %}
+  </div>
+
+  <div class="space-y-4">
+    {% for m in messages %}
+      <div class="p-4 rounded border border-gray-700 {% if m.is_staff %}bg-blue-900/30{% else %}bg-gray-800/50{% endif %}">
+        <div class="text-xs text-gray-400 mb-1">
+          {% if m.is_staff %}Сотрудник{% else %}Пользователь{% endif %}
+          · {{ m.created_at|date:'Y-m-d H:i' }}
+        </div>
+        <div class="whitespace-pre-wrap">{{ m.body }}</div>
+      </div>
+    {% empty %}
+      <div class="text-gray-400">Пока нет сообщений.</div>
+    {% endfor %}
+  </div>
+
+  <hr class="my-6 border-gray-700" />
+
+  {% if reply_form %}
+    <form method="post" class="space-y-3">
+      {% csrf_token %}
+      <label class="block text-sm">Ответ администратора</label>
+      {{ reply_form.body }}
+      <div class="flex items-center gap-2">
+        <select name="status" class="bg-gray-800 rounded px-2 py-1">
+          {% for key,label in ticket.STATUS_CHOICES %}
+            <option value="{{ key }}" {% if ticket.status == key %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="px-4 py-2 rounded bg-blue-600">Отправить</button>
+      </div>
+    </form>
+  {% else %}
+    <div class="mt-6 text-sm text-gray-400">Ответы может оставлять только администратор.</div>
+  {% endif %}
+</div>
+{% endblock %}

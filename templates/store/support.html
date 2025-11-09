@@ -4,10 +4,11 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
   <section class="lg:col-span-2 bg-gray-900 rounded-lg p-6">
     <h1 class="text-2xl font-bold mb-4">Поддержка</h1>
+    <div class="mb-4 text-sm"><a href="{% url 'store:support_tickets' %}" class="text-blue-300 hover:underline">Мои обращения</a></div>
     {% if success %}
       <div class="p-4 bg-green-800/40 border border-green-700 rounded mb-4">Ваше обращение отправлено. Мы свяжемся с вами по email.</div>
     {% endif %}
-    <form method="post" class="space-y-4">
+    <form id="support-form" method="post" class="space-y-4">
       {% csrf_token %}
       <div class="text-sm text-gray-300">
         Ваша учётная запись: <span class="font-semibold">{{ request.user.username }}</span>{% if request.user.email %} • {{ request.user.email }}{% endif %}
@@ -34,6 +35,18 @@
       </div>
       <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">Отправить</button>
     </form>
+    
+    <!-- Success Modal -->
+    <div id="support-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+      <div class="bg-gray-900 border border-gray-700 rounded-lg p-6 w-full max-w-md text-center">
+        <div class="text-xl font-semibold mb-2">Обращение отправлено</div>
+        <div class="text-sm text-gray-300 mb-4">Мы получили ваше сообщение. Мы ответим на email и в уведомлениях.</div>
+        <div class="flex items-center justify-center gap-3">
+          <a id="modal-ticket-link" href="#" class="px-4 py-2 rounded bg-blue-600">Открыть обращение</a>
+          <button id="modal-close" class="px-4 py-2 rounded border border-gray-600">Закрыть</button>
+        </div>
+      </div>
+    </div>
   </section>
   <aside class="bg-gray-900 rounded-lg p-6">
     <h2 class="text-xl font-semibold mb-3">Частые вопросы</h2>
@@ -49,4 +62,47 @@
     </ul>
   </aside>
 </div>
+
+<script>
+(function(){
+  const form = document.getElementById('support-form');
+  const modal = document.getElementById('support-modal');
+  const link = document.getElementById('modal-ticket-link');
+  const close = document.getElementById('modal-close');
+  if(!form || !modal || !link || !close) return;
+  function getCSRF(){
+    const inp = document.querySelector('input[name=csrfmiddlewaretoken]');
+    if (inp) return inp.value;
+    const m = document.cookie.match(/csrftoken=([^;]+)/); return m?m[1]:'';
+  }
+  form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const btn = form.querySelector('button[type=submit]');
+    if(btn){ btn.disabled = true; btn.classList.add('opacity-70'); }
+    try{
+      const fd = new FormData(form);
+      const resp = await fetch('{% url 'store:support' %}', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCSRF() },
+        body: fd,
+        credentials: 'same-origin'
+      });
+      const data = await resp.json();
+      if (resp.ok && data && data.ok){
+        link.href = '{% url 'store:support_ticket' 0 %}'.replace('/0/', `/${data.ticket_id}/`);
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        form.reset();
+        return;
+      }
+      // fallback to regular submit when JSON failed
+      form.submit();
+    } catch(_){ form.submit(); }
+    finally{ if(btn){ btn.disabled = false; btn.classList.remove('opacity-70'); } }
+  });
+  function hide(){ modal.classList.add('hidden'); modal.classList.remove('flex'); }
+  close.addEventListener('click', hide);
+  modal.addEventListener('click', (e)=>{ if(e.target === modal) hide(); });
+})();
+</script>
 {% endblock %}

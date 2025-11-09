@@ -3,7 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, get_user_model
 from django.db.models import Q
 from decimal import Decimal
-from .models import UserProfile, SupportTicket, Review
+from .models import UserProfile, SupportTicket, SupportMessage, Review
 from django.utils import timezone
 
 
@@ -207,6 +207,21 @@ class SupportTicketForm(forms.ModelForm):
         if cleaned.get('category') == 'other' and not (cleaned.get('category_other') or cleaned.get('subject')):
             self.add_error('category_other', 'Пожалуйста, уточните тему для категории "Другое"')
         return cleaned
+
+
+class SupportReplyForm(forms.ModelForm):
+    class Meta:
+        model = SupportMessage
+        fields = ('body',)
+        widgets = {
+            'body': forms.Textarea(attrs={'class': 'w-full px-3 py-2 rounded bg-gray-800 text-gray-100', 'rows': 5, 'placeholder': 'Ваш ответ'}),
+        }
+
+    def clean_body(self):
+        body = (self.cleaned_data.get('body') or '').strip()
+        if len(body) < 5:
+            raise forms.ValidationError('Минимальная длина сообщения — 5 символов.')
+        return body
 
 
 class ReviewForm(forms.ModelForm):

@@ -26,6 +26,7 @@ from .forms import (
     ProfileSettingsForm,  # legacy (single form)
     ProfileAppearanceForm,
     SupportTicketForm,
+    SupportReplyForm,
     ReviewForm,
     GeneralSettingsForm,
     PrivacySettingsForm,
@@ -534,6 +535,14 @@ class ProfileSettingsView(LoginRequiredMixin, UpdateView):
         except Exception:
             pass
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        try:
+            ctx['notifications_unread_count'] = Notification.objects.filter(user=self.request.user, is_read=False).count()
+        except Exception:
+            ctx['notifications_unread_count'] = 0
+        return ctx
 
 
 class ProfileEditView(LoginRequiredMixin, UpdateView):
@@ -1630,6 +1639,83 @@ class SupportView(LoginRequiredMixin, View):
         ]
         return render(request, self.template_name, {"form": form, "faqs": faqs})
 
+    def post(self, request):
+        """Создание нового тикета поддержки.
+
+        Перенесено сюда из ошибочно расположенного post() в SearchSuggestView.
+        """
+        form = SupportTicketForm(request.POST)
+        faqs = []
+        if form.is_valid():
+            ticket = SupportTicket(
+                user=request.user,
+                email=request.user.email or '',
+                category=form.cleaned_data['category'],
+                category_other=form.cleaned_data.get('category_other', ''),
+                subject=form.cleaned_data['subject'],
+                message=form.cleaned_data['message'],
+            )
+            ticket.save()
+            # Создаём первое сообщение переписки
+            try:
+                from .models import SupportMessage
+                SupportMessage.objects.create(
+                    ticket=ticket,
+                    author=request.user,
+                    is_staff=getattr(request.user, 'is_staff', False),
+                    body=ticket.message,
+                )
+            except Exception:
+                pass
+            # Уведомим специального администратора поддержки внутренним Notification
+            try:
+                from django.contrib.auth import get_user_model
+                from .models import Notification
+                User = get_user_model()
+                admin_username = getattr(settings, 'SUPPORT_ADMIN_USERNAME', 'admin')
+                admin_user = User.objects.filter(username=admin_username).first()
+                if admin_user:
+                    Notification.objects.create(
+                        user=admin_user,
+                        kind='support_new',
+                        payload={'ticket_id': ticket.id, 'subject': ticket.subject, 'from': request.user.username},
+                        link_url=reverse('store:support_ticket', args=[ticket.id])
+                    )
+                # Также создаём уведомление для самого пользователя с прямой ссылкой на тикет
+                try:
+                    Notification.objects.create(
+                        user=request.user,
+                        kind='support_created',
+                        payload={'ticket_id': ticket.id, 'subject': ticket.subject},
+                        link_url=reverse('store:support_ticket', args=[ticket.id])
+                    )
+                except Exception:
+                    pass
+            except Exception:
+                pass
+            # Email уведомление сотрудникам
+            try:
+                from django.core.mail import send_mail
+                support_email = getattr(settings, 'SUPPORT_EMAIL', None) or getattr(settings, 'DEFAULT_FROM_EMAIL', None)
+                if support_email:
+                    send_mail(
+                        subject=f"[Support] {ticket.subject}",
+                        message=f"Ticket #{ticket.id}\nUser: {request.user.username}\nEmail: {ticket.email}\nCategory: {ticket.category}\nMessage:\n{ticket.message}",
+                        from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', support_email),
+                        recipient_list=[support_email],
+                        fail_silently=True,
+                    )
+            except Exception:
+                pass
+            # Если AJAX – вернуть JSON для показа модального окна, иначе редирект
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({"ok": True, "ticket_id": ticket.id})
+            request.session['support_ticket_created'] = ticket.id
+            return redirect('store:support')
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({"ok": False, "errors": form.errors}, status=400)
+        return render(request, self.template_name, {"form": form, "faqs": faqs})
+
 
 class SearchSuggestView(View):
     """Return lightweight JSON suggestions for the header search field.
@@ -1753,26 +1839,116 @@ class SearchSuggestView(View):
             })
         return JsonResponse({"items": items})
 
+    # POST intentionally unused here (раньше ошибочно создавал тикеты)
     def post(self, request):
-        form = SupportTicketForm(request.POST)
-        faqs = []
+        return JsonResponse({"error": "POST not supported"}, status=405)
+
+
+class SupportTicketDetailView(LoginRequiredMixin, View):
+    template_name = 'store/support_ticket_detail.html'
+
+    def get(self, request, pk: int):
+        ticket = get_object_or_404(SupportTicket, id=pk)
+        # Ограничиваем видимость: владелец или staff
+        # Разрешено просматривать: автор тикета или специальный support-admin
+        allowed = False
+        if ticket.user_id == request.user.id:
+            allowed = True
+        else:
+            admin_username = getattr(settings, 'SUPPORT_ADMIN_USERNAME', 'admin')
+            if request.user.username == admin_username:
+                allowed = True
+        if not allowed:
+            messages.error(request, "Нет доступа к этому обращению.")
+            return redirect('store:support')
+        ctx = {"ticket": ticket, "messages": ticket.messages.all()}
+        admin_username = getattr(settings, 'SUPPORT_ADMIN_USERNAME', 'admin')
+        if request.user.username == admin_username:
+            ctx["reply_form"] = SupportReplyForm()
+            ctx["is_support_admin"] = True
+        else:
+            ctx["is_support_admin"] = False
+        return render(request, self.template_name, ctx)
+
+    def post(self, request, pk: int):
+        ticket = get_object_or_404(SupportTicket, id=pk)
+        # Право отвечать: только для сотрудников/админов
+        admin_username = getattr(settings, 'SUPPORT_ADMIN_USERNAME', 'admin')
+        if request.user.username != admin_username:
+            messages.error(request, "Отвечать на тикеты может только администратор поддержки.")
+            return redirect('store:support_ticket', pk=ticket.id)
+        # Удаление тикета (только админ)
+        if request.POST.get('action') == 'delete' or 'delete' in request.POST:
+            ticket.delete()
+            messages.success(request, "Обращение удалено.")
+            return redirect('store:support_tickets')
+
+        # Обновление только статуса без ответа
+        if 'status' in request.POST and not request.POST.get('body'):
+            new_status = request.POST.get('status')
+            valid_statuses = {s[0] for s in SupportTicket.STATUS_CHOICES}
+            if new_status in valid_statuses:
+                if new_status != ticket.status:
+                    ticket.status = new_status
+                    ticket.save(update_fields=['status'])
+                    messages.success(request, "Статус обновлён.")
+                else:
+                    messages.info(request, "Статус без изменений.")
+            else:
+                messages.error(request, "Некорректный статус.")
+            return redirect('store:support_ticket', pk=ticket.id)
+
+        form = SupportReplyForm(request.POST)
         if form.is_valid():
-            ticket = SupportTicket(
-                user=request.user,
-                email=request.user.email or '',
-                category=form.cleaned_data['category'],
-                category_other=form.cleaned_data.get('category_other', ''),
-                subject=form.cleaned_data['subject'],
-                message=form.cleaned_data['message'],
-            )
-            ticket.save()
-            return render(request, self.template_name, {
-                "form": SupportTicketForm(),
-                "success": True,
-                "ticket": ticket,
-                "faqs": faqs,
-            })
-        return render(request, self.template_name, {"form": form, "faqs": faqs})
+            msg_obj = form.save(commit=False)
+            msg_obj.ticket = ticket
+            msg_obj.author = request.user
+            msg_obj.is_staff = True
+            msg_obj.save()
+            # При ответе сотрудника: уведомление + email пользователю
+            if msg_obj.is_staff and ticket.user and ticket.user.email:
+                try:
+                    from django.core.mail import send_mail
+                    send_mail(
+                        subject=f"[Ответ поддержки] {ticket.subject}",
+                        message=f"Здравствуйте! Получен ответ по вашему обращению #{ticket.id}:\n\n{msg_obj.body}\n\n-- SteamClone Поддержка",
+                        from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', None),
+                        recipient_list=[ticket.user.email],
+                        fail_silently=True,
+                    )
+                except Exception:
+                    pass
+                # Внутреннее уведомление
+                try:
+                    Notification.objects.create(
+                        user=ticket.user,
+                        kind='support_reply',
+                        payload={'ticket_id': ticket.id, 'subject': ticket.subject},
+                        link_url=reverse('store:support_ticket', args=[ticket.id])
+                    )
+                except Exception:
+                    pass
+            messages.success(request, "Ответ отправлен.")
+            # Обновляем статус если поле передано (для support-admin)
+            new_status = request.POST.get('status')
+            if new_status in {s[0] for s in SupportTicket.STATUS_CHOICES} and new_status != ticket.status:
+                ticket.status = new_status
+                ticket.save(update_fields=['status'])
+            return redirect('store:support_ticket', pk=ticket.id)
+        messages.error(request, "Исправьте ошибки формы ответа.")
+        return render(request, self.template_name, {"ticket": ticket, "reply_form": form, "messages": ticket.messages.all()})
+
+
+class SupportTicketListView(LoginRequiredMixin, View):
+    template_name = 'store/support_tickets.html'
+
+    def get(self, request):
+        admin_username = getattr(settings, 'SUPPORT_ADMIN_USERNAME', 'admin')
+        if request.user.username == admin_username:
+            qs = SupportTicket.objects.all().order_by('-updated_at')
+        else:
+            qs = SupportTicket.objects.filter(user=request.user).order_by('-updated_at')
+        return render(request, self.template_name, {"tickets": qs, "is_admin_view": request.user.username == admin_username})
 
 
 class SteamAuthStartView(TemplateView):
@@ -2639,10 +2815,18 @@ class NotificationsView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        qs = Notification.objects.filter(user=self.request.user).order_by('-created_at')[:100]
+        qs = Notification.objects.filter(user=self.request.user).order_by('-created_at')[:200]
         ctx['unread'] = [n for n in qs if not n.is_read]
         ctx['all'] = qs
-        # mark all as read (simple behavior)
+        # Для уведомлений поддержки формируем удобный payload рендер
+        support_map = {}
+        for n in qs:
+            if n.kind in {'support_new','support_reply'}:
+                tid = (n.payload or {}).get('ticket_id')
+                subj = (n.payload or {}).get('subject') or ''
+                support_map.setdefault(tid, subj)
+        ctx['support_subjects'] = support_map
+        # Прочитываем
         Notification.objects.filter(user=self.request.user, is_read=False).update(is_read=True)
         return ctx
 

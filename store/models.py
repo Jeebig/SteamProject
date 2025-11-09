@@ -499,6 +499,25 @@ class SupportTicket(models.Model):
         return f"[{self.get_status_display()}] {who}: {self.subject}"
 
 
+class SupportMessage(models.Model):
+    """Отдельные сообщения в рамках обращения в поддержку.
+
+    Позволяет формировать переписку между пользователем и персоналом.
+    Первое сообщение (оригинал обращения) дублируется из SupportTicket.message при создании тикета.
+    """
+    ticket = models.ForeignKey(SupportTicket, on_delete=models.CASCADE, related_name='messages')
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='support_messages')
+    is_staff = models.BooleanField(default=False, help_text="Сообщение отправлено сотрудником/администратором")
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']  # хронологический порядок для удобства чтения
+
+    def __str__(self):
+        return f"Msg #{self.id} for Ticket #{self.ticket_id}"
+
+
 class ProfileComment(models.Model):
     """Комментарий на странице профиля пользователя.
 
@@ -587,6 +606,9 @@ class Notification(models.Model):
         ('friend_request', 'Заявка в друзья'),
         ('friend_accept', 'Дружба подтверждена'),
         ('price_drop', 'Снижение цены в списке желаемого'),
+        ('support_reply', 'Ответ поддержки'),
+        ('support_new', 'Новое обращение в поддержку'),
+        ('support_created', 'Создано ваше обращение'),
     ]
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
     kind = models.CharField(max_length=32, choices=KIND_CHOICES)

@@ -26,7 +26,8 @@
     <style>
         /* small tweaks to better match steam-like dark gradients */
         .steam-header {
-            background: linear-gradient(180deg, #0b2a3a 0%, #07202a 100%);
+            background: linear-gradient(180deg, rgba(11,42,58,0.98) 0%, rgba(7,32,42,0.95) 100%);
+            backdrop-filter: saturate(120%) blur(6px);
         }
         /* visual helper classes used across templates */
         .promo-big-shadow {
@@ -37,8 +38,8 @@
     </style>
 </head>
 
-<body class="bg-[#071722] text-gray-100 font-sans">
-    <header class="steam-header text-gray-100">
+<body class="bg-[#071722] text-gray-100 font-sans min-h-screen flex flex-col">
+    <header class="steam-header sticky top-0 z-50 text-gray-100 border-b border-[#0a1e24] transition-shadow">
         <div class="container mx-auto flex items-center justify-between px-4 py-3">
             <div class="flex items-center gap-6">
                 <a href="{% url 'store:home' %}" class="flex items-center gap-2">
@@ -147,6 +148,7 @@
                             <li><a href="{% url 'store:friends' %}" class="block px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">{% trans 'Друзья' %}</a></li>
                             <li><a href="{% url 'store:subscriptions' %}" class="block px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">{% trans 'Подписки' %}</a></li>
                             <li><a href="{% url 'store:notifications' %}" class="block px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">{% trans 'Уведомления' %}</a></li>
+                            <li><a href="{% url 'store:support_tickets' %}" class="block px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">{% trans 'Мои обращения' %}</a></li>
                             <li class="border-t border-[#0a1e24] mt-1 pt-1"><a href="{% url 'store:profile_edit' %}" class="block px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">{% trans 'Редактировать профиль' %}</a></li>
                             <li><a href="{% url 'store:settings_default' %}" class="block px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">{% trans 'Настройки' %}</a></li>
                             <li class="border-t border-[#0a1e24] mt-1 pt-1"><form action="{% url 'store:logout' %}" method="post">{% csrf_token %}<button type="submit" class="w-full text-left px-4 py-2 hover:bg-[#0e3b4a]" role="menuitem">{% trans 'Выйти' %}</button></form></li>
@@ -163,7 +165,7 @@
         </div>
     </header>
 
-    <main class="container mx-auto p-4">
+    <main class="container mx-auto p-4 flex-1">
         {% if messages %}
         <div class="mb-4 space-y-2">
             {% for message in messages %}
@@ -176,12 +178,69 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="text-center p-6 text-sm text-gray-400">
-        &copy; 2025 SteamClone
+    <footer class="mt-10 bg-[#0b2230] border-t border-[#0a1e24] text-gray-300">
+        <div class="container mx-auto px-4 py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div>
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-black font-bold">SC</div>
+                    <span class="text-lg font-semibold">SteamClone</span>
+                </div>
+                <p class="text-sm text-blue-100">{% trans 'Небольшой магазин игр в стиле Steam: каталог, скидки, библиотека и кошелёк.' %}</p>
+            </div>
+            <div>
+                <h3 class="text-sm uppercase tracking-wider text-blue-200 mb-3">{% trans 'Разделы' %}</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a class="hover:text-white" href="{% url 'store:home' %}">{% trans 'Главная' %}</a></li>
+                    <li><a class="hover:text-white" href="{% url 'store:charts' %}">{% trans 'Чарты' %}</a></li>
+                    <li><a class="hover:text-white" href="{% url 'store:recommendations' %}">{% trans 'Рекомендации' %}</a></li>
+                    <li><a class="hover:text-white" href="{% url 'store:wishlist' %}">{% trans 'Список желаемого' %}</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-sm uppercase tracking-wider text-blue-200 mb-3">{% trans 'Аккаунт' %}</h3>
+                <ul class="space-y-2 text-sm">
+                    {% if user.is_authenticated %}
+                        <li><a class="hover:text-white" href="{% url 'store:library' %}">{% trans 'БИБЛИОТЕКА' %}</a></li>
+                        <li><a class="hover:text-white" href="{% url 'store:settings_default' %}">{% trans 'Настройки' %}</a></li>
+                        <li><a class="hover:text-white" href="{% url 'store:support' %}">{% trans 'ПОДДЕРЖКА' %}</a></li>
+                    {% else %}
+                        <li><a class="hover:text-white" href="{% url 'login' %}">{% trans 'Войти' %}</a></li>
+                        <li><a class="hover:text-white" href="{% url 'store:support' %}">{% trans 'ПОДДЕРЖКА' %}</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-sm uppercase tracking-wider text-blue-200 mb-3">{% trans 'Мы в соцсетях' %}</h3>
+                <div class="flex items-center gap-3">
+                    <a href="#" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center" aria-label="Twitter" title="Twitter">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="text-blue-300"><path d="M22.46 6c-.77.35-1.6.58-2.46.69a4.27 4.27 0 0 0 1.88-2.36 8.49 8.49 0 0 1-2.7 1.03 4.24 4.24 0 0 0-7.23 3.87A12.04 12.04 0 0 1 3.15 4.6a4.24 4.24 0 0 0 1.31 5.66 4.2 4.2 0 0 1-1.92-.53v.05a4.24 4.24 0 0 0 3.4 4.16 4.25 4.25 0 0 1-1.91.07 4.24 4.24 0 0 0 3.95 2.94A8.51 8.51 0 0 1 2 19.54 12.01 12.01 0 0 0 8.29 21c7.55 0 11.68-6.26 11.68-11.68 0-.18 0-.36-.01-.53A8.35 8.35 0 0 0 22.46 6z"/></svg>
+                    </a>
+                    <a href="#" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center" aria-label="YouTube" title="YouTube">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="text-red-400"><path d="M21.8 8s-.2-1.4-.8-2c-.8-.8-1.6-.8-2-0.9C16.7 4.8 12 4.8 12 4.8h0s-4.7 0-7 .3c-.4 0-1.2.1-2 .9-.6.6-.8 2-.8 2S2 9.6 2 11.2v1.6C2 14.4 2.2 16 2.2 16s.2 1.4.8 2c.8.8 1.8.8 2.2.9 1.6.2 6.8.3 6.8.3s4.7 0 7-.3c.4 0 1.2-.1 2-.9.6-.6.8-2 .8-2s.2-1.6.2-3.2v-1.6C22 9.6 21.8 8 21.8 8zM10 14.7V8.9l5.8 2.9L10 14.7z"/></svg>
+                    </a>
+                    <a href="#" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center" aria-label="GitHub" title="GitHub">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" class="text-gray-200"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2.2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.3-1.8-1.3-1.8-1-.7.1-.7.1-.7 1 .1 1.6 1 1.6 1 .9 1.6 2.6 1.2 3.2.9.1-.7.4-1.2.7-1.5-2.7-.3-5.5-1.4-5.5-6.1 0-1.3.5-2.5 1.2-3.4-.1-.3-.5-1.6.1-3.3 0 0 1-.3 3.5 1.3a12 12 0 0 1 6.4 0c2.5-1.6 3.5-1.3 3.5-1.3.6 1.7.2 3 .1 3.3.8.9 1.2 2.1 1.2 3.4 0 4.7-2.8 5.8-5.5 6.1.4.4.8 1 .8 2.1v3c0 .3.2.7.8.6A12 12 0 0 0 12 .5z"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-[#0a1e24] text-center text-sm text-blue-200 py-4">
+            &copy; {% now "Y" %} SteamClone · {% trans 'Все права защищены' %}
+        </div>
     </footer>
 
     <!-- small global scripts for UI (kept minimal) -->
     <script>
+                // Header shadow on scroll
+                (function(){
+                    const h = document.querySelector('header.steam-header');
+                    if(!h) return;
+                    const onScroll = () => {
+                        if (window.scrollY > 2) h.classList.add('shadow-lg'); else h.classList.remove('shadow-lg');
+                    };
+                    onScroll();
+                    window.addEventListener('scroll', onScroll, { passive: true });
+                })();
                                 // Language switch AJAX
                                 (function(){
                                     const sel = document.getElementById('lang-switch');

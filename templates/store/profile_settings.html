@@ -55,6 +55,19 @@
                 <label class="block text-sm text-gray-300 mb-1">Валюта</label>
                 {{ form.preferred_currency }}
             </div>
+        <div class="pt-4">
+            <div class="mt-4 flex items-center gap-4">
+                <a href="{% url 'store:notifications' %}" class="text-blue-500 hover:underline relative inline-flex items-center">
+                    {% trans 'Notifications' %}
+                    {% with unread_count=notifications_unread_count %}
+                        {% if unread_count and unread_count > 0 %}
+                            <span class="ml-2 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">{{ unread_count }}</span>
+                        {% endif %}
+                    {% endwith %}
+                </a>
+                <a href="{% url 'store:support' %}" class="text-blue-500 hover:underline">{% trans 'Support' %}</a>
+            </div>
+        </div>
             <div>
                 <label class="block text-sm text-gray-300 mb-1">Приватность профиля</label>
                 {{ form.privacy }}

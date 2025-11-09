@@ -41,7 +41,7 @@
   {% csrf_token %}
   <div class="flex flex-wrap gap-2 mb-4" id="tabs">
     <button type="button" data-tab="appearance" class="tab-btn active">Внешний вид</button>
-    <button type="button" data-tab="persona" class="tab-btn">Персона</button>
+    <button type="button" data-tab="persona" class="tab-btn">Имя</button>
     <button type="button" data-tab="theme" class="tab-btn">Тема</button>
     <button type="button" data-tab="preview" class="tab-btn">Превью</button>
   </div>
@@ -67,11 +67,11 @@
   <div class="tab-pane" id="tab-persona">
     <div class="space-y-4">
       <label class="block">
-        <span class="text-xs text-gray-300">Отображаемое имя (persona)</span>
+        <span class="text-xs text-gray-300">Отображаемое имя</span>
         {{ form.steam_persona }}
       </label>
       <label class="block">
-        <span class="text-xs text-gray-300">Никнейм (логин)</span>
+        <span class="text-xs text-gray-300">Никнейм</span>
         {% if request.user.profile.steam_id %}
           {{ form.new_username }}
           <p class="text-[11px] text-gray-400 mt-1">Никнейм меняется в аккаунте Steam, так как профиль привязан к Steam.</p>
@@ -96,7 +96,7 @@
   <div class="tab-pane" id="tab-theme">
     <div class="space-y-4">
       <label class="block">
-        <span class="text-xs text-gray-300">Цвет акцента</span>
+        <span class="text-xs text-gray-300">Цвет темы</span>
         {{ form.theme_color }}
         <p class="text-xs text-gray-400 mt-1">Укажите HEX (#ff8800) или оставьте пустым для стандартного #1b6b80.</p>
       </label>
@@ -120,7 +120,7 @@
         <div class="flex items-start gap-4">
           <div id="preview-avatar" class="w-20 h-20 rounded-full bg-[#0b2630] flex items-center justify-center text-2xl font-bold accent-ring">A</div>
           <div class="flex-1">
-            <div class="text-xl font-semibold" id="preview-name">Persona</div>
+            <div class="text-xl font-semibold" id="preview-name">Имя</div>
             <div class="text-sm text-gray-300 mt-1" id="preview-bio">Био будет здесь…</div>
           </div>
         </div>

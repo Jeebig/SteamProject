@@ -1,0 +1,1 @@
+web: gunicorn steam_clone.wsgi:application --log-file -

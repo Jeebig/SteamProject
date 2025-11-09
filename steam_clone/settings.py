@@ -1,13 +1,28 @@
 import os
 from pathlib import Path
+try:
+    from dotenv import load_dotenv  # type: ignore
+except Exception:
+    def load_dotenv(*args, **kwargs):
+        return False
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+_env_path = BASE_DIR / '.env'
+if _env_path.exists():
+    load_dotenv(_env_path)
 
-SECRET_KEY = 'replace-me-in-production'
-DEBUG = True
+def _get_bool(name: str, default: bool = False) -> bool:
+    val = os.getenv(name)
+    if val is None:
+        return default
+    return str(val).strip().lower() in {"1", "true", "yes", "on"}
 
-ALLOWED_HOSTS = []
+SECRET_KEY = os.getenv('SECRET_KEY', 'replace-me-in-production')
+DEBUG = _get_bool('DEBUG', True)
+
+_hosts = [h.strip() for h in os.getenv('ALLOWED_HOSTS', '').split(',') if h.strip()]
+ALLOWED_HOSTS = _hosts if _hosts else []
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -23,6 +38,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -101,8 +117,16 @@ LOCALE_PATHS = [BASE_DIR / 'locale']
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+# Where collectstatic will place files for production/static hosting
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Recommended when deploying behind a known domain (e.g., PythonAnywhere)
+_csrf_origins = [o.strip() for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()]
+if _csrf_origins:
+    CSRF_TRUSTED_ORIGINS = _csrf_origins
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -146,3 +170,10 @@ CURRENCY_FETCH_TIMEOUT = 1.2
 
 # Price drop alerts: default percent threshold
 PRICE_DROP_THRESHOLD_PERCENT = 15
+
+# Email settings (заполните реальные значения в продакшене)
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')  # prod: django.core.mail.backends.smtp.EmailBackend
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'support@steamclone.local')
+SUPPORT_EMAIL = os.getenv('SUPPORT_EMAIL', 'support@steamclone.local')
+# Имя учётной записи администратора поддержки (должно существовать в БД)
+SUPPORT_ADMIN_USERNAME = os.getenv('SUPPORT_ADMIN_USERNAME', 'admin')

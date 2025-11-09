@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-2xl font-bold">{% trans 'Мои обращения в поддержку' %}</h1>
+    <a href="{% url 'store:support' %}" class="text-sm px-3 py-1 rounded bg-blue-600">{% trans 'Новое обращение' %}</a>
+  </div>
+  <div class="bg-gray-900 rounded-lg divide-y divide-gray-800">
+    {% for t in tickets %}
+      <a href="{% url 'store:support_ticket' t.id %}" class="block p-4 hover:bg-gray-800">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-semibold">#{{ t.id }} · {{ t.subject }}</div>
+            <div class="text-xs text-gray-400">{{ t.created_at|date:'Y-m-d H:i' }}</div>
+          </div>
+          <span class="text-xs px-2 py-1 rounded border border-gray-600">{{ t.get_status_display }}</span>
+        </div>
+      </a>
+    {% empty %}
+      <div class="p-6 text-gray-400">Пока нет обращений.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
