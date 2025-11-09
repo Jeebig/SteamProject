@@ -19,7 +19,8 @@ def _get_bool(name: str, default: bool = False) -> bool:
     return str(val).strip().lower() in {"1", "true", "yes", "on"}
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'replace-me-in-production')
-DEBUG = _get_bool('DEBUG', True)
+# Default DEBUG to False for safety in production; override via .env for local dev
+DEBUG = _get_bool('DEBUG', False)
 
 _hosts = [h.strip() for h in os.getenv('ALLOWED_HOSTS', '').split(',') if h.strip()]
 ALLOWED_HOSTS = _hosts if _hosts else []

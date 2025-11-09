@@ -1,0 +1,88 @@
+/* Shared responsive tweaks across pages */
+
+/* Catalog grid: make images keep 16:9 and shrink comfortably on phones */
+.catalog-grid .catalog-card img {
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
+@media (max-width: 640px) {
+  .catalog-grid {
+    gap: 12px;
+  }
+  .catalog-card {
+    padding: 10px;
+  }
+  .catalog-card .card-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+/* Wishlist cards alignment on phones */
+[data-wishlist-item] .flex {
+  flex-wrap: wrap;
+}
+[data-wishlist-item] .w-40 {
+  width: 100% !important;
+}
+[data-wishlist-item] .w-40 + div {
+  width: 100%;
+}
+
+/* Wishlist: stack actions full-width on very small screens */
+@media (max-width: 480px) {
+  [data-wishlist-item] .mt-2 {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  [data-wishlist-item] .mt-2 > * {
+    width: 100%;
+  }
+  [data-wishlist-item] .mt-2 form {
+    width: 100%;
+  }
+  [data-wishlist-item] .mt-2 button,
+  [data-wishlist-item] .mt-2 span {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Header adjustments: make search compress and show language badge properly */
+@media (max-width: 768px) {
+  #site-search-wrap {
+    display: none;
+  }
+}
+
+/* Cart/Checkout price stacks on phones */
+@media (max-width: 640px) {
+  .cart-line,
+  .checkout-line {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
+
+/* Filters panel toggle behavior on small screens */
+@media (max-width: 1024px) {
+  #catalog-filters {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease, padding 0.2s ease;
+    margin-bottom: 0;
+  }
+  #catalog-filters.open {
+    max-height: 80vh;
+    margin-bottom: 12px;
+  }
+}
+
+/* Lock body scroll when mobile nav open */
+body.mobile-nav-open {
+  overflow: hidden;
+}

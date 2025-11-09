@@ -11,7 +11,7 @@
       {% if detailed_items %}
         {% for row in detailed_items %}
           {% with it=row.item g=row.game %}
-          <div class="bg-gray-800 rounded p-4 mb-3 flex items-center gap-4">
+          <div class="bg-gray-800 rounded p-4 mb-3 flex items-center gap-4 cart-line">
             <div class="w-36 h-20 flex-shrink-0">
               {% with local_path="steam_imports/"|add:g.appid|add:"/header.jpg" %}
                 {% if g.cover_image %}
@@ -35,11 +35,9 @@
                 </div>
               </div>
               <div class="text-sm text-gray-400 mt-1">
-                {% if g.price|floatformat:2 == '0.00' %}
-                  {% trans 'Бесплатно' %}
-                {% else %}
-                  {{ g.price|floatformat:2 }} {{ g.currency }} × {{ row.qty }} =
-                  <span class="font-semibold text-gray-200">{{ row.line_total|floatformat:2 }} {{ row.currency }}</span>
+                <span class="mr-1">{% price_display g.price g.currency preferred_currency g.original_price g.discount_percent %}</span>
+                {% if g.price|floatformat:2 != '0.00' %}
+                  × {{ row.qty }} = <span class="font-semibold text-gray-200">{{ row.line_total|floatformat:2 }} {{ row.currency }}</span>
                   {% if preferred_currency and preferred_currency != row.currency %}
                     <span class="text-gray-400 text-xs ml-2">≈ {{ row.converted_line_total|floatformat:2 }} {{ preferred_currency }}</span>
                   {% endif %}
@@ -110,10 +108,7 @@
   <div class="col-span-12 lg:col-span-4">
     <div class="bg-gray-900 rounded-lg p-6 sticky top-4">
   <div class="text-lg font-semibold">{% trans 'Общая стоимость' %}</div>
-  <div class="mt-2 text-2xl font-bold">{% if subtotal|floatformat:2 == '0.00' %}{% trans 'Бесплатно' %}{% else %}{{ subtotal|floatformat:2 }} {{ currency }}{% endif %}</div>
-      {% if preferred_currency and preferred_currency != currency %}
-  <div class="text-gray-400">≈ {{ converted_subtotal|floatformat:2 }} {{ preferred_currency }}</div>
-      {% endif %}
+  <div class="mt-2 text-2xl font-bold">{% price_display subtotal currency preferred_currency None None %}</div>
   <p class="text-xs text-gray-500 mt-3">{% trans 'Налог с продаж рассчитывается при оформлении покупки в регионах, где он применим.' %}</p>
   <a href="{% url 'store:checkout' %}" class="mt-4 block w-full text-center px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">{% trans 'Перейти к оплате' %}</a>
     </div>

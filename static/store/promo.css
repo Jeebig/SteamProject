@@ -48,7 +48,8 @@
 }
 
 .promo-big-shadow {
-  /* kept for consistency with template */
+  /* kept for consistency with template; fallback subtle shadow */
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
 }
 
 .promo-outer {
@@ -210,8 +211,8 @@
 }
 
 .promo-carousel-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: #1b2838 #0b2630;
+  /* enable horizontal scrolling appearance without custom scrollbar properties */
+  overscroll-behavior-x: contain;
 }
 .promo-carousel-scroll::-webkit-scrollbar {
   height: 8px;
@@ -230,7 +231,8 @@
 .promo-outer .promo-slide .md\:w-\[360px\],
 .promo-outer .promo-slide .md\:w-\[300px\],
 .promo-outer .promo-slide .md\:w-\[560px\] {
-  /* allow these fixed-width Tailwind utility classes to behave as intended */
+  /* placeholder declarations to avoid empty ruleset lint errors */
+  min-height: 0;
 }
 
 .promo-right {
@@ -244,6 +246,7 @@
   display: -webkit-box;
   -webkit-line-clamp: 6;
   -webkit-box-orient: vertical;
+  line-clamp: 6; /* non-standard draft; improves compatibility */
   overflow: hidden;
 }
 
@@ -279,7 +282,8 @@
   inset: 0;
 }
 .promo-outer .indicators-wrap {
-  /* keep for backwards compatibility but override below */
+  /* ensure flex context if used inside block */
+  display: flex;
 }
 
 /* Global indicators wrapper when rendered outside the promo block */
@@ -359,6 +363,26 @@
     flex: 0 0 auto;
     max-width: 100%;
   }
+  .promo-thumbs {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  .promo-thumbs img {
+    width: 46%;
+    height: 84px;
+  }
+  .promo-right-panel h3 {
+    font-size: 1.1rem;
+    line-height: 1.2;
+  }
+  .promo-right-panel .promo-footer {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  .promo-left button,
+  .promo-left .promo-cover-image {
+    min-height: 180px;
+  }
 }
 
 /* Categories carousel styles (added) */
@@ -366,8 +390,8 @@
   position: relative;
 }
 .categories-section .cat-track {
+.categories-section .cat-track {
   display: flex;
-  -webkit-overflow-scrolling: touch;
   overflow: auto;
 }
 .categories-section .category-card {
@@ -444,6 +468,15 @@
   .categories-section .cat-next {
     width: 34px;
     height: 34px;
+  }
+  .home-grid .card-media img {
+    object-position: center top;
+  }
+  .home-grid .card-media {
+    aspect-ratio: 16/9;
+  }
+  .promo-cover-image {
+    min-height: 180px;
   }
 }
 

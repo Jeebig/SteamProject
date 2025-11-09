@@ -32,15 +32,6 @@
                     {% endfor %}
                 </div>
                 {% endif %}
-                                <div class="mt-3 flex items-center gap-3 text-sm">
-                                    {% if user.is_authenticated and r.user_id == user.id and can_review %}
-                                        <form method="post" action="{% url 'store:review_delete' r.id %}">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="next" value="{{ request.get_full_path }}#reviews">
-                                            <button type="submit" class="btn" style="background:#5b232f">{% trans 'Удалить отзыв' %}</button>
-                                        </form>
-                                    {% endif %}
-                                </div>
             </div>
 
             <!-- Editions / purchase block (simple) -->
@@ -48,9 +39,7 @@
                 <div class="edition-card">
                     <div class="edition-title">{% trans 'Стандартное издание' %}</div>
                     <div class="edition-actions">
-                        <div class="price">
-                            {% if converted_price|floatformat:2 == '0.00' %}{% trans 'Бесплатно' %}{% else %}{{ converted_price }} {{ preferred_currency }}{% endif %}
-                        </div>
+                        <div class="price">{% price_display converted_price preferred_currency preferred_currency game.original_price game.discount_percent %}</div>
                         {% if user.is_authenticated %}
                             {% is_owned user game as owned_flag %}
                             {% if owned_flag %}
@@ -120,14 +109,7 @@
                             {% else %}
                                 <img src="{% static 'store/img/placeholder.svg' %}" alt="{{ g.title }}">
                             {% endif %}
-                                    <div class="price-band">
-                                        {% if g.discount_percent and g.original_price %}
-                                            <span class="disc">-{{ g.discount_percent }}%</span>
-                                            <div class="prices"><span class="old">{{ g.original_price }} {{ g.currency }}</span><span class="new">{{ g.price }} {{ g.currency }}</span></div>
-                                        {% else %}
-                                            <div class="prices"><span class="new">{% if g.price|floatformat:2 == '0.00' %}{% trans 'Бесплатно' %}{% else %}{{ g.price }} {{ g.currency }}{% endif %}</span></div>
-                                        {% endif %}
-                                    </div>
+                                    <div class="price-band"><div class="prices">{% price_display g.price g.currency preferred_currency g.original_price g.discount_percent %}</div></div>
                         </a>
                     {% endfor %}
                 </div>
@@ -152,14 +134,7 @@
                             {% else %}
                                 <img src="{% static 'store/img/placeholder.svg' %}" alt="{{ g.title }}">
                             {% endif %}
-                                    <div class="price-band">
-                                        {% if g.discount_percent and g.original_price %}
-                                            <span class="disc">-{{ g.discount_percent }}%</span>
-                                            <div class="prices"><span class="old">{{ g.original_price }} {{ g.currency }}</span><span class="new">{{ g.price }} {{ g.currency }}</span></div>
-                                        {% else %}
-                                            <div class="prices"><span class="new">{% if g.price|floatformat:2 == '0.00' %}{% trans 'Бесплатно' %}{% else %}{{ g.price }} {{ g.currency }}{% endif %}</span></div>
-                                        {% endif %}
-                                    </div>
+                                    <div class="price-band"><div class="prices">{% price_display g.price g.currency preferred_currency g.original_price g.discount_percent %}</div></div>
                         </a>
                     {% endfor %}
                 </div>
@@ -206,15 +181,7 @@
             </div>
 
                     <div class="buybox">
-                        {% if game.discount_percent and game.original_price %}
-                            <div class="price price-rich">
-                                <span class="disc">-{{ game.discount_percent }}%</span>
-                                <span class="old">{{ game.original_price }} {{ preferred_currency }}</span>
-                                <span class="new">{{ converted_price }} {{ preferred_currency }}</span>
-                            </div>
-                        {% else %}
-                            <div class="price">{% if converted_price|floatformat:2 == '0.00' %}{% trans 'Бесплатно' %}{% else %}{{ converted_price }} {{ preferred_currency }}{% endif %}</div>
-                        {% endif %}
+                        <div class="price">{% price_display converted_price preferred_currency preferred_currency game.original_price game.discount_percent %}</div>
                 {% if user.is_authenticated %}
                     {% is_owned user game as owned_flag %}
                     <div class="flex gap-2">
@@ -277,11 +244,11 @@
                                     <span class="star-slot">
                                         {% if i > 1 %}
                                             {% with hv=i|add:'-0.5' %}
-                                                <input id="rate-new-{{ hv|slugify }}" type="radio" name="rating" value="{{ hv }}" {% if hv == initial_rating|floatformat:1 %}checked{% endif %}>
+                                                <input id="rate-new-{{ hv|slugify }}" type="radio" name="rating" value="{{ hv }}" {% if hv|floatformat:1 == initial_rating|floatformat:1 %}checked{% endif %}>
                                                 <label class="half" for="rate-new-{{ hv|slugify }}" title="{% blocktrans with score=hv %}{{ score }} из 5{% endblocktrans %}">★</label>
                                             {% endwith %}
                                         {% endif %}
-                                        <input id="rate-new-{{ i }}" type="radio" name="rating" value="{{ i }}" {% if i|stringformat:'s' == initial_rating|floatformat:1 %}checked{% endif %}>
+                                        <input id="rate-new-{{ i }}" type="radio" name="rating" value="{{ i }}" {% if i|floatformat:1 == initial_rating|floatformat:1 %}checked{% endif %}>
                                         <label class="full" for="rate-new-{{ i }}" title="{% blocktrans with score=i %}{{ score }} из 5{% endblocktrans %}">★</label>
                                     </span>
                                 {% endfor %}
@@ -371,7 +338,7 @@
                                                       <label class="half" for="rate-edit-{{ r.id }}-{{ hv|slugify }}" title="{% blocktrans with score=hv %}{{ score }} из 5{% endblocktrans %}">★</label>
                                                   {% endwith %}
                                               {% endif %}
-                                              <input id="rate-edit-{{ r.id }}-{{ i }}" type="radio" name="rating" value="{{ i }}" {% if i|stringformat:'s' == r.rating|floatformat:1 %}checked{% endif %}>
+                                              <input id="rate-edit-{{ r.id }}-{{ i }}" type="radio" name="rating" value="{{ i }}" {% if i|floatformat:1 == r.rating|floatformat:1 %}checked{% endif %}>
                                               <label class="full" for="rate-edit-{{ r.id }}-{{ i }}" title="{% blocktrans with score=i %}{{ score }} из 5{% endblocktrans %}">★</label>
                                           </span>
                                       {% endfor %}

@@ -17,6 +17,8 @@
   gap: 20px;
   justify-content: center;
   max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 12px;
 }
 .left .title {
   font-size: 28px;
@@ -540,4 +542,65 @@
   width: 50%;
   overflow: hidden;
   color: #f6c343; /* filled color */
+}
+
+/* ===== Responsive (phones & tablets) ===== */
+@media (max-width: 1024px) {
+  .page.game-detail .layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    max-width: 980px;
+  }
+  .right {
+    position: static;
+    top: auto;
+  }
+  .media-viewer .media-main {
+    max-height: min(56vw, 420px);
+    object-fit: cover;
+  }
+  .carousel-track {
+    grid-auto-columns: 200px;
+  }
+}
+
+@media (max-width: 640px) {
+  .left .title {
+    font-size: 22px;
+  }
+  .media-viewer {
+    padding: 6px;
+  }
+  .media-viewer .media-main {
+    max-height: 58vw; /* keep 16:9 crop close to full width */
+  }
+  .thumbs {
+    gap: 8px;
+  }
+  .thumbs img {
+    width: 120px;
+    height: 68px;
+    border-radius: 3px;
+  }
+  .edition-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .edition-card .edition-actions {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .right .buybox .price,
+  .edition-card .price {
+    font-size: 16px;
+  }
+  .carousel-arrow {
+    width: 30px;
+    height: 44px;
+  }
+  .carousel-track {
+    grid-auto-columns: 180px;
+  }
 }
