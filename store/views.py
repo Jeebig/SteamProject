@@ -438,9 +438,22 @@ class GameDetailView(DetailView):
 
 
 class ReviewVoteView(LoginRequiredMixin, View):
+    """
+    Handles voting for review helpfulness (up/down).
+    Only one vote per user per review. Disallows voting on own reviews.
+    Throttles voting to prevent spam.
+    """
     """Handle helpful/unhelpful votes for a review (one per user)."""
 
     def post(self, request, pk):
+        """
+        Handles POST request for voting on a review.
+        Parameters:
+            - request: HTTP request
+            - pk: review primary key
+        Returns:
+            - Redirect or JSON response
+        """
         review = get_object_or_404(Review, id=pk)
         vote = request.POST.get('vote')  # 'up' or 'down'
         helpful = True if vote == 'up' else False

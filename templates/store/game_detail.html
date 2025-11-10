@@ -13,7 +13,7 @@
                 <div class="subtitle">{{ game.developer.name }}</div>
             {% endif %}
 
-            <!-- Media viewer -->
+            <!-- Блок медиа: скриншоты, обложка -->
             <div class="media-viewer">
                 {% if game.appid %}
                     <img id="mainMedia" src="/media/steam_imports/{{ game.appid }}/header.jpg?v={{ nowts }}" alt="{{ game.title }}" class="media-main" onerror="this.onerror=null;this.src='{% if game.cover_image %}{{ game.cover_image.url }}{% else %}{% static 'store/img/placeholder.svg' %}{% endif %}'" />
@@ -34,7 +34,7 @@
                 {% endif %}
             </div>
 
-            <!-- Editions / purchase block (simple) -->
+            <!-- Блок покупки и выбора издания -->
             <div class="editions">
                 <div class="edition-card">
                     <div class="edition-title">{% trans 'Стандартное издание' %}</div>
@@ -63,12 +63,12 @@
                 </div>
             </div>
 
-            <!-- Description -->
+            <!-- Описание игры -->
             <div class="description">
                 {{ game.description|safe }}
             </div>
 
-            <!-- System requirements -->
+            <!-- Системные требования -->
             <div class="sysreq">
                 <h2>{% trans 'СИСТЕМНЫЕ ТРЕБОВАНИЯ' %}</h2>
                 <div class="sysreq-grid">
@@ -87,7 +87,7 @@
                 </div>
             </div>
 
-            <!-- More from developer carousel -->
+            <!-- Карусель других игр разработчика -->
                     {% if more_from_developer %}
                     <div class="carousel">
                                 <div class="carousel-header flex items-center justify-between">
@@ -116,7 +116,7 @@
             </div>
             {% endif %}
 
-            <!-- Similar games carousel -->
+            <!-- Карусель похожих игр -->
                     {% if similar_games %}
                     <div class="carousel">
                         <div class="carousel-header flex items-center justify-between"><h2>{% trans 'ПОХОЖИЕ ТОВАРЫ' %}</h2>
@@ -142,7 +142,7 @@
             {% endif %}
         </section>
 
-        <!-- Right column -->
+    <!-- Правая колонка: краткая информация, покупка, отзывы -->
         <aside class="right">
             <div class="capsule">
                 {% if game.appid %}

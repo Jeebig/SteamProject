@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
 {% load static store_extras i18n %}
 
+{# Каталог игр: фильтры, сортировка, карточки игр #}
 {% block content %}
 <button type="button" class="filters-toggle bg-blue-600 text-white px-4 py-2 rounded mb-4 md:hidden" aria-expanded="false" aria-controls="catalog-filters">{% trans 'Фильтры' %}</button>
 {% now 'U' as nowts %}
 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-    <!-- Filters column -->
+    <!-- Filters column: категории, поиск, цена, платформа -->
     <aside id="catalog-filters" class="lg:col-span-1 bg-[#0f2a33] p-4 rounded-lg border border-[#072024]">
     <h3 class="text-lg font-bold text-white mb-3">{% trans 'Фильтры' %}</h3>
         <form method="get" class="space-y-4">
@@ -82,9 +83,10 @@
         </form>
     </aside>
 
-    <!-- Products grid -->
+    <!-- Products grid: карточки игр -->
     <main class="lg:col-span-3">
-        <div class="flex items-center justify-between mb-4">
+    <!-- Сортировка и заголовок -->
+    <div class="flex items-center justify-between mb-4">
             <h1 class="text-3xl text-white">{% trans 'Магазин' %}</h1>
             <div class="flex items-center gap-2 text-sm">
                 <span class="text-gray-300">{% trans 'Сортировать:' %}</span>
@@ -92,7 +94,8 @@
                 <a href="?{% if filters.q %}q={{ filters.q }}&{% endif %}{% if filters.category %}category={{ filters.category }}&{% endif %}{% for p in filters.platforms %}platform={{ p }}&{% endfor %}{% if filters.min_price %}min_price={{ filters.min_price }}&{% endif %}{% if filters.max_price %}max_price={{ filters.max_price }}&{% endif %}sort=rating" class="px-2 py-1 rounded bg-[#12333f] hover:bg-[#18566f] text-white {% if filters.sort == 'rating' %}!bg-[#1c5a6e]{% endif %}">{% trans 'Рейтинг ↑' %}</a>
             </div>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 catalog-grid">
+    <!-- Сетка карточек игр -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 catalog-grid">
             {% for game in games %}
                 <div class="bg-[#232f3e] p-3 rounded-lg catalog-card">
                     {% if game.appid %}

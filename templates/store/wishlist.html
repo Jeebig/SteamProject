@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 {% load static store_extras i18n %}
+{# Список желаемого: отображение игр, управление списком #}
 {% block content %}
+<!-- Основной контейнер страницы -->
 <div class="bg-gray-900 rounded-lg p-6 mb-6">
+    <!-- Блок профиля пользователя -->
     <div class="flex items-center gap-4 mb-4">
         {% if user.profile.steam_avatar %}
             <img src="{{ user.profile.steam_avatar }}" {% img_dims user.profile.steam_avatar %}
@@ -17,6 +20,7 @@
             <div class="text-sm text-gray-400">{% trans 'Список желаемого:' %} {{ games|length }}</div>
         </div>
     </div>
+    <!-- Форма фильтрации и сортировки -->
     <form method="get" class="flex gap-2 mb-4 items-center">
     <input type="text" name="q" value="{{ filters.q }}" placeholder="{% trans 'Поиск по названию' %}"
             class="px-3 py-2 rounded bg-gray-800 text-gray-100 w-full">
@@ -37,9 +41,12 @@
     <button type="submit" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-white">{% trans 'Применить' %}</button>
     <a href="{% url 'store:wishlist' %}" class="bg-gray-700 px-3 py-2 rounded text-gray-200">{% trans 'Сбросить' %}</a>
     </form>
+    <!-- Список игр в желаемом -->
     <div class="space-y-6">
-        {% for game in games %}
+    {% for game in games %}
+    <!-- Карточка игры -->
     <div class="bg-gray-800 rounded-lg flex gap-4 p-4 items-center" data-wishlist-item="{{ game.slug }}">
+            <!-- Обложка игры -->
             <div class="w-40 h-24 flex-shrink-0">
                 <a href="{% url 'store:game_detail' game.slug %}" class="block w-full h-full">
                     {% with local_path="steam_imports/"|add:game.appid|add:"/header.jpg" %}
@@ -57,11 +64,14 @@
                     {% endwith %}
                 </a>
             </div>
+            <!-- Информация о игре и действия -->
             <div class="flex-1">
+                <!-- Название и цена -->
                 <div class="flex items-center justify-between">
                     <h2 class="text-xl font-bold"><a class="hover:underline" href="{% url 'store:game_detail' game.slug %}">{{ game.title }}</a></h2>
                     <span class="font-bold text-lg bg-gray-900 px-3 py-1 rounded">{% price_display game.price game.currency preferred_currency game.original_price game.discount_percent %}</span>
                 </div>
+                <!-- Разработчик и жанры -->
                 <div class="text-sm text-gray-400 mb-1">
                     {% if game.developer %}{{ game.developer.name }}{% else %}—{% endif %}
                     {% for genre in game.genres.all %}
@@ -70,13 +80,17 @@
                                 <span class="ml-2 px-2 py-1 bg-gray-700 rounded text-gray-500">{% trans 'Жанры не указаны' %}</span>
                     {% endfor %}
                 </div>
+                <!-- Дата выхода -->
                 <div class="text-xs text-gray-500 mb-1">{% trans 'Дата выхода:' %} {{ game.release_date|date:"d.m.Y"|default:"—" }}</div>
+                <!-- Платформы -->
                 <div class="text-xs text-gray-400 mb-1">
                     {% if game.supports_windows %}<span class="px-2 py-0.5 border border-gray-600 rounded mr-1">Win</span>{% endif %}
                     {% if game.supports_mac %}<span class="px-2 py-0.5 border border-gray-600 rounded mr-1">Mac</span>{% endif %}
                     {% if game.supports_linux %}<span class="px-2 py-0.5 border border-gray-600 rounded">Linux</span>{% endif %}
                 </div>
+                <!-- Дата добавления на сайт -->
                 <div class="text-xs text-gray-500 mb-1">{% trans 'Добавлено на сайт:' %} {{ game.created_at|date:'d.m.Y' }}</div>
+                <!-- Действия: добавить в корзину, удалить из желаемого -->
                 <div class="flex gap-2 mt-2 wishlist-actions">
                     {% is_owned user game as owned_flag %}
                     {% if owned_flag %}
@@ -96,7 +110,8 @@
                 </div>
             </div>
         </div>
-        {% empty %}
+    {% empty %}
+    <!-- Пустой список желаемого -->
     <p class="text-gray-400">{% trans 'Ваш список желаемого пуст.' %} <a href="{% url 'store:game_list' %}" class="text-blue-400 underline">{% trans 'Перейти в каталог' %}</a></p>
         {% endfor %}
     </div>

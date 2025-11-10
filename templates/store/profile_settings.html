@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 
+{# Настройки профиля пользователя: форма, уведомления, приватность, язык, валюта #}
 {% block content %}
 {% load i18n %}
+<!-- Заголовок страницы -->
 <h1 class="text-2xl mb-4">{% trans 'Настройки профиля' %}</h1>
 <style>
     /* High-contrast variant (черный текст, светлый фон) для всех полей настроек */
@@ -42,10 +44,12 @@
     /* High contrast helper for small helper text */
     .helper-text { color:#444; }
 </style>
+<!-- Форма настроек профиля -->
 <form method="post" enctype="multipart/form-data" class="profile-settings-form bg-[#0b2230] p-6 rounded max-w-2xl space-y-8 border border-[#0a1e24] shadow-lg">
         {% csrf_token %}
 
-        <fieldset class="space-y-4">
+    <!-- Блок аккаунта: язык, валюта, приватность -->
+    <fieldset class="space-y-4">
             <legend class="text-lg font-semibold">Аккаунт</legend>
             <div>
                 <label class="block text-sm text-gray-300 mb-1">Предпочтительный язык</label>
@@ -74,7 +78,8 @@
             </div>
         </fieldset>
 
-        <fieldset class="space-y-4">
+    <!-- Блок приватности -->
+    <fieldset class="space-y-4">
             <legend class="text-lg font-semibold">Приватность</legend>
             <div>
                 <label class="block text-sm font-medium text-gray-200 mb-1">Кто может комментировать профиль</label>
@@ -90,7 +95,8 @@
 
         {# Appearance moved to profile_edit page #}
 
-        <fieldset class="space-y-4">
+    <!-- Блок уведомлений -->
+    <fieldset class="space-y-4">
             <legend class="text-lg font-semibold">Уведомления</legend>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <label class="pref-item flex items-center gap-2 text-sm bg-gray-700/40 px-3 py-2 rounded" data-pref="notify_profile_comment">
@@ -132,7 +138,8 @@
             <p class="text-xs text-gray-400">Email отправляется только если он указан в аккаунте.</p>
         </fieldset>
 
-        <div class="pt-2">
+    <!-- Кнопка сохранения -->
+    <div class="pt-2">
             <button type="submit" class="bg-blue-600 px-4 py-2 rounded text-sm font-semibold">Сохранить изменения</button>
         </div>
 </form>

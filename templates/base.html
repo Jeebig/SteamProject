@@ -21,19 +21,19 @@
     <meta name="twitter:description" content="{% block tw_description %}Магазин игр SteamClone – каталог, скидки, библиотека и кошелёк.{% endblock %}">
     {% if og_image %}<meta name="twitter:image" content="{{ og_image }}">{% endif %}
     {% endblock %}
-    <!-- Tailwind via CDN for rapid prototyping -->
+    <!-- Подключение Tailwind CSS для стилизации -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* small tweaks to better match steam-like dark gradients */
+    /* Header gradient for Steam-like look */
         .steam-header {
             background: linear-gradient(180deg, rgba(11,42,58,0.98) 0%, rgba(7,32,42,0.95) 100%);
             backdrop-filter: saturate(120%) blur(6px);
         }
-        /* visual helper classes used across templates */
+    /* Promo shadow for main banners */
         .promo-big-shadow {
             box-shadow: 0 20px 40px rgba(0,0,0,0.55);
         }
-        /* skeleton placeholder for lazy images */
+    /* Skeleton placeholder for lazy-loaded images */
         .skeleton { background-size: 200% 200%; }
     </style>
     <link rel="stylesheet" href="{% static 'store/responsive.css' %}">
@@ -281,9 +281,9 @@
         </div>
     </footer>
 
-    <!-- small global scripts for UI (kept minimal) -->
+    <!-- Глобальные UI-скрипты: хедер, навигация, поиск, аккаунт, корзина/желания -->
     <script>
-                // Header shadow on scroll
+                    // Add shadow to header on scroll
                 (function(){
                     const h = document.querySelector('header.steam-header');
                     if(!h) return;
@@ -293,7 +293,7 @@
                     onScroll();
                     window.addEventListener('scroll', onScroll, { passive: true });
                 })();
-                                // Language switch AJAX
+                                // Language switcher: AJAX update
                                 (function(){
                                     const sel = document.getElementById('lang-switch');
                                     if(!sel) return;
@@ -311,7 +311,7 @@
                                     });
                                 })();
                 (function(){
-                    // Mobile nav toggle
+                    // Mobile navigation panel toggle
                     const mbtn = document.getElementById('mobile-nav-toggle');
                     const mpanel = document.getElementById('mobile-nav-panel');
                     if(mbtn && mpanel){
@@ -332,7 +332,7 @@
                             }
                         });
                     }
-                    // --- Store main dropdown: keep open on hover and allow click ---
+                    // Store main dropdown: open on hover/click
                     const mmWrap = document.getElementById('main-menu-wrap');
                     const mmTrigger = document.getElementById('main-menu-trigger');
                     const mmPanel = document.getElementById('main-menu-panel');
@@ -420,7 +420,7 @@
                     document.addEventListener('keydown', (e) => { if(e.key === 'Escape') hide(); });
                 })();
 
-                // --- Account menu dropdown ---
+                    // Account menu dropdown: open/close logic
                 (function(){
                     const wrap = document.getElementById('account-menu-wrap');
                     if(!wrap) return;
@@ -439,7 +439,7 @@
                     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ panel.classList.add('hidden'); trigger.setAttribute('aria-expanded','false'); trigger.focus(); } });
                 })();
 
-                // --- AJAX add to cart / wishlist (no page reload) ---
+                    // AJAX add to cart / wishlist (no page reload)
                 (function(){
                     function getCSRF(){
                         const inp = document.querySelector('input[name=csrfmiddlewaretoken]');

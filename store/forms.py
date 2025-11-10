@@ -225,6 +225,16 @@ class SupportReplyForm(forms.ModelForm):
 
 
 class ReviewForm(forms.ModelForm):
+    """
+    ReviewForm: form for submitting/editing game reviews.
+    Fields:
+        - rating: decimal, 1.0–5.0, step 0.5
+        - text: required, min 10 chars
+    Validation:
+        - clean_text: checks minimum length
+        - clean_rating: checks range and step
+    """
+    """Форма для создания и редактирования отзывов к играм."""
     rating = forms.DecimalField(min_value=Decimal('1.0'), max_value=Decimal('5.0'), decimal_places=1, widget=forms.NumberInput(attrs={
         'class': 'w-20 px-2 py-1 rounded bg-gray-800 text-gray-100', 'step': '0.5'
     }))
@@ -258,6 +268,10 @@ class ReviewForm(forms.ModelForm):
 
 
 class EmailOrUsernameAuthenticationForm(AuthenticationForm):
+    """
+    Authentication form: allows login by username or email.
+    """
+    """Форма авторизации по email или username."""
     """Allow users to log in using either username or email.
 
     The template can continue to render {{ form.username }} and {{ form.password }}.

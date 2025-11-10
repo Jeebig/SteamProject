@@ -4,6 +4,14 @@ We attempt to fetch live rates from exchangerate.host but cache them in-memory
 for a short TTL to avoid hammering the API. If network fails, we use a static
 fallback table relative to USD.
 """
+"""
+Currency utilities for:
+    - Conversion between currencies
+    - Formatting prices
+    - Fetching exchange rates (live and fallback)
+    - Caching rates to reduce API calls
+    - Graceful fallback if network fails
+"""
 from decimal import Decimal, ROUND_HALF_UP
 import requests
 from django.conf import settings

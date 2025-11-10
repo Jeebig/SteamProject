@@ -6,6 +6,14 @@ from django.utils import timezone
 
 
 class Developer(models.Model):
+    """
+    Developer model: represents a game developer or studio.
+    Fields:
+        - name: Developer name (unique)
+        - slug: URL-friendly identifier
+        - appid: Optional Steam AppID
+        - website: Official website
+    """
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     appid = models.IntegerField(null=True, blank=True, unique=True)
@@ -21,6 +29,12 @@ class Developer(models.Model):
 
 
 class Genre(models.Model):
+    """
+    Genre model: represents a game genre (Action, RPG, etc).
+    Fields:
+        - name: Genre name (unique)
+        - slug: URL-friendly identifier
+    """
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True, blank=True)
 
@@ -34,6 +48,14 @@ class Genre(models.Model):
 
 
 class Game(models.Model):
+    """
+    Game model: main entity for store catalog.
+    Fields:
+        - title, slug, appid, description
+        - price, original_price, discount_percent, currency
+        - release_date, developer, genres
+        - cover_image, screenshots, system requirements
+    """
     CURRENCY_CHOICES = [
         ('USD', 'USD'),
         ('EUR', 'EUR'),
@@ -179,6 +201,17 @@ class OwnedGame(models.Model):
 
 # Отзыв: пользователь, игра, текст, рейтинг
 class Review(models.Model):
+    """
+    Review model: user review for a game.
+    Fields:
+        - user: author
+        - game: reviewed game
+        - text: review content
+        - rating: score (1.0–5.0)
+        - created_at: timestamp
+    Constraints:
+        - unique_together: one review per user/game
+    """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews')
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='reviews')
     text = models.TextField(blank=True)
@@ -196,6 +229,16 @@ class Review(models.Model):
 
 
 class ReviewVote(models.Model):
+    """
+    ReviewVote model: marks a review as helpful/unhelpful.
+    Fields:
+        - review: target review
+        - user: who voted
+        - helpful: True/False
+        - created_at: timestamp
+    Constraints:
+        - unique_together: one vote per user/review
+    """
     """A single user's vote marking a review as helpful or not helpful.
 
     Unique per (review, user).
@@ -214,6 +257,14 @@ class ReviewVote(models.Model):
 
 # Профиль пользователя
 class UserProfile(models.Model):
+    """
+    UserProfile: extended user info and preferences.
+    Fields:
+        - preferred_language, preferred_currency
+        - privacy, comment privacy, friend request privacy
+        - balance, total_spent, wishlist
+        - avatar, steam_avatar, friend_code
+    """
     LANG_CHOICES = [
         ('en', 'English'),
         ('uk', 'Українська'),

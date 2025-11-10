@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
 {% load static store_extras steam_tags i18n %}
 
+{# Главная страница магазина: баннер, промо, категории, скидки, хиты, новые релизы #}
 {% block content %}
+<!-- Основной фон и контейнер страницы -->
 <div class="bg-[#16202d] min-h-screen">
+    <!-- Контейнер для основного контента -->
     <div class="max-w-7xl mx-auto px-4 py-6">
 
-        <!-- Banner / Hero -->
+    <!-- Баннер / Превью избранной игры -->
         <div class="relative rounded-lg overflow-hidden mb-8 shadow-lg">
             {% if featured and featured.0 %}
             {% with featured_game=featured.0 %}
@@ -39,7 +42,7 @@
             {% endif %}
         </div>
 
-        <!-- Популярное и рекомендуемое (карточка слева + панель справа) -->
+    <!-- Популярное и рекомендуемое: промо-слайдер -->
     <h2 class="text-2xl font-semibold mb-4 text-white">{% trans 'Популярное и рекомендуемое' %}</h2>
         <div class="relative mb-10">
             <div
@@ -249,7 +252,7 @@
 
         <!-- products panel JS removed from index; game_list page now contains full filters UI -->
 
-        <!-- Categories carousel: if `categories` not provided, build from catalog tags -->
+    <!-- Карусель категорий -->
         <div class="categories-section mt-6 mb-8">
             <h2 class="text-xl font-semibold mb-3 text-white">{% trans 'Категории' %}</h2>
             {% if not categories %}
@@ -298,7 +301,7 @@
 
         {# Products panel removed from index to reduce page weight; users go to `store:game_list` for full filters + grid. #}
 
-        <!-- Button to open full products panel (replaces inline "Больше продуктов" list) -->
+    <!-- Кнопка для перехода к каталогу -->
         <div class="mb-4 flex items-center justify-between">
             <h2 class="text-2xl font-semibold mb-0 text-white">Скидки и мероприятия</h2>
             <a href="{% url 'store:game_list' %}" id="open-products-panel" role="button" class="ml-4 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow focus:outline-none focus:ring-2 focus:ring-white/30" aria-haspopup="true">
@@ -372,7 +375,7 @@
 
         {# The products grid has been moved into the products panel above. #}
 
-        <!-- Хиты продаж -->
+    <!-- Хиты продаж: топовые игры -->
         <div class="mt-12">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-2xl font-semibold text-white">{% trans 'Хиты продаж' %}</h2>
@@ -416,7 +419,7 @@
             {% endif %}
         </div>
 
-        <!-- Новые релизы -->
+    <!-- Новые релизы: свежие поступления -->
         <div class="mt-12">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-2xl font-semibold text-white">{% trans 'Новые релизы' %}</h2>
